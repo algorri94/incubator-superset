@@ -8,7 +8,8 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import g, Flask, request
+from flask import g, request
+from flask_appbuilder.security.views import expose
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
 from flask_login import login_user, logout_user
@@ -17,7 +18,6 @@ from sqlalchemy import or_
 from superset import sql_parse
 from superset.connectors.connector_registry import ConnectorRegistry
 
-app = Flask(__name__)
 
 READ_ONLY_MODEL_VIEWS = {
     'DatabaseAsync',
@@ -84,7 +84,7 @@ OBJECT_SPEC_PERMISSIONS = set([
 
 class SupersetSecurityManager(SecurityManager):
 
-    @app.route('/rest_login', methods = ['POST'])
+    @expose('/rest_login', methods = ['POST'])
     def rest_login(self):
         username = request.json.get('username')
         password = request.json.get('password')
