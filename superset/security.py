@@ -8,16 +8,19 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import g, request
-from flask_appbuilder.security.views import expose,AuthDBView
+from flask import g, request, Flask
+from flask_appbuilder.security.views import expose
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
 from flask_login import login_user, logout_user
+from flask_restful import Resource, Api, abort
 from sqlalchemy import or_
 
 from superset import sql_parse
 from superset.connectors.connector_registry import ConnectorRegistry
 
+app = Flask(__name__)
+api = Api(app)
 
 READ_ONLY_MODEL_VIEWS = {
     'DatabaseAsync',
@@ -81,30 +84,24 @@ OBJECT_SPEC_PERMISSIONS = set([
     'metric_access',
 ])
 
-class CustomAuthDBView(AuthDBView):
-    @expose('/rest_login', methods = ['POST'])
-    def rest_login(self):
+class Login(Resource):
+    def post(self):
         username = request.json.get('username')
         password = request.json.get('password')
+
         if username is None or username == "":
-            return 400
-        user = self.find_user(username=username)
+            abort(400, message='Username is required.')
+
+        user = SecurityManager.auth_user_db(self, username, password)
+
         if user is None:
-            user = self.find_user(email=username)
-        if user is None or (not user.is_active()):
-            return 401
-        elif SecurityManager.ucheck_password_hash(user.password, password):
-            self.update_user_auth_stat(user, True)
-            login_user(user, remember=False)
-            return 200
+            abort(401, message='The user or the password given do not match.')
         else:
-            self.update_user_auth_stat(user, False)
-            return 401
+            login_user(user, remember=False)
+            return ''
 
 
 class SupersetSecurityManager(SecurityManager):
-
-    authdbview = CustomAuthDBView
 
     def get_schema_perm(self, database, schema):
         if schema:
