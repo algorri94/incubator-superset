@@ -283,7 +283,8 @@ SQL_CELERY_RESULTS_DB_FILE_PATH = os.path.join(DATA_DIR, 'celery_results.sqlite'
 # static http headers to be served by your Superset server.
 # This header prevents iFrames from other domains and
 # "clickjacking" as a result
-HTTP_HEADERS = {'X-Frame-Options': 'ALLOW-FROM http://35.234.143.145'}
+HTTP_HEADERS = {'X-Frame-Options': 'ALLOW-FROM http://35.234.143.145',
+                'Content-Security-Policy': 'frame-ancestors http://35.234.143.145'}
 # If you need to allow iframes from other domains (and are
 # aware of the risks), you can disable this header:
 # HTTP_HEADERS = {}
