@@ -9,7 +9,6 @@ from __future__ import unicode_literals
 import logging
 
 from flask import g, request, Flask
-from flask_appbuilder.security.views import expose
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
 from flask_login import login_user, logout_user
@@ -385,3 +384,6 @@ class SupersetSecurityManager(SecurityManager):
         return pvm.permission.name in {
             'can_override_role_permissions', 'can_approve',
         }
+
+
+api.add_resource(Login, '/api/login')
