@@ -9,7 +9,7 @@ from __future__ import unicode_literals
 import logging
 
 from flask import g, request
-from flask_appbuilder.security.views import expose
+from flask_appbuilder.security.views import expose,AuthDBView
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
 from flask_login import login_user, logout_user
@@ -81,9 +81,7 @@ OBJECT_SPEC_PERMISSIONS = set([
     'metric_access',
 ])
 
-
-class SupersetSecurityManager(SecurityManager):
-
+class CustomAuthDBView(AuthDBView):
     @expose('/rest_login', methods = ['POST'])
     def rest_login(self):
         username = request.json.get('username')
@@ -102,6 +100,11 @@ class SupersetSecurityManager(SecurityManager):
         else:
             self.update_user_auth_stat(user, False)
             return 401
+
+
+class SupersetSecurityManager(SecurityManager):
+
+    authdbview = CustomAuthDBView
 
     def get_schema_perm(self, database, schema):
         if schema:
