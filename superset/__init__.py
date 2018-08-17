@@ -11,7 +11,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
 
-from flask import Flask, redirect, request
+from flask import Flask, redirect
 from flask_appbuilder import AppBuilder, IndexView, SQLA
 from flask_appbuilder.baseviews import expose
 from flask_compress import Compress
@@ -168,23 +168,6 @@ appbuilder = AppBuilder(
     security_manager_class=custom_sm,
     update_perms=utils.get_update_perms_flag(),
 )
-
-from flask_login import login_user
-
-
-@app.route('/api/login', methods=['POST'])
-def rest_login(self):
-    username = request.json.get('username')
-    password = request.json.get('password')
-    if username is None or username == "":
-        return 400
-    user = appbuilder.sm.auth_user_db(self, username, password)
-    if user is None:
-        return 401
-    else:
-        login_user(user, remember=False)
-        return 200
-
 
 security_manager = appbuilder.sm
 
