@@ -8,18 +8,14 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import g, request, Flask
+from flask import g
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
-from flask_login import login_user, logout_user
-from flask_restful import Resource, Api, abort
 from sqlalchemy import or_
 
 from superset import sql_parse
 from superset.connectors.connector_registry import ConnectorRegistry
 
-app = Flask(__name__)
-api = Api(app)
 
 READ_ONLY_MODEL_VIEWS = {
     'DatabaseAsync',
@@ -82,22 +78,6 @@ OBJECT_SPEC_PERMISSIONS = set([
     'datasource_access',
     'metric_access',
 ])
-
-class Login(Resource):
-    def post(self):
-        username = request.json.get('username')
-        password = request.json.get('password')
-
-        if username is None or username == "":
-            abort(400, message='Username is required.')
-
-        user = SecurityManager.auth_user_db(self, username, password)
-
-        if user is None:
-            abort(401, message='The user or the password given do not match.')
-        else:
-            login_user(user, remember=False)
-            return ''
 
 
 class SupersetSecurityManager(SecurityManager):
@@ -384,6 +364,3 @@ class SupersetSecurityManager(SecurityManager):
         return pvm.permission.name in {
             'can_override_role_permissions', 'can_approve',
         }
-
-
-api.add_resource(Login, '/api/login')
