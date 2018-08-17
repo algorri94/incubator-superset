@@ -83,9 +83,6 @@ OBJECT_SPEC_PERMISSIONS = set([
 
 class SupersetSecurityManager(SecurityManager):
 
-    app = None
-
-    @app.route('/api/login', methods=['POST'])
     def rest_login(self):
         username = request.json.get('username')
         password = request.json.get('password')
@@ -380,7 +377,3 @@ class SupersetSecurityManager(SecurityManager):
         return pvm.permission.name in {
             'can_override_role_permissions', 'can_approve',
         }
-
-    def __init__(self, appbuilder):
-        super(SupersetSecurityManager, self).__init__(appbuilder)
-        self.app = self.appbuilder.get_app
