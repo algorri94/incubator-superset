@@ -8,10 +8,9 @@ from __future__ import unicode_literals
 
 import logging
 
-from flask import g, request
+from flask import g
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
-from flask_login import login_user
 from sqlalchemy import or_
 
 from superset import sql_parse
@@ -82,18 +81,6 @@ OBJECT_SPEC_PERMISSIONS = set([
 
 
 class SupersetSecurityManager(SecurityManager):
-
-    def rest_login(self):
-        username = request.json.get('username')
-        password = request.json.get('password')
-        if username is None or username == "":
-            return 400
-        user = self.auth_user_db(self, username, password)
-        if user is None:
-            return 401
-        else:
-            login_user(user, remember=False)
-            return 200
 
     def get_schema_perm(self, database, schema):
         if schema:
