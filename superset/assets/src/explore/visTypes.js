@@ -57,6 +57,7 @@ export const sections = {
         ['groupby'],
         ['limit', 'timeseries_limit_metric'],
         ['order_desc', 'contribution'],
+        ['row_limit', null],
       ],
     },
     {
@@ -142,7 +143,7 @@ export const visTypes = {
           ['metric'],
           ['adhoc_filters'],
           ['groupby'],
-          ['limit'],
+          ['row_limit'],
         ],
       },
       {
@@ -151,11 +152,16 @@ export const visTypes = {
         controlSetRows: [
           ['pie_label_type'],
           ['donut', 'show_legend'],
-          ['labels_outside'],
+          ['show_labels', 'labels_outside'],
           ['color_scheme'],
         ],
       },
     ],
+    controlOverrides: {
+      row_limit: {
+        default: 25,
+      },
+    },
   },
 
   line: {
@@ -626,6 +632,7 @@ export const visTypes = {
       },
       {
         label: t('Grid'),
+        expanded: true,
         controlSetRows: [
           ['grid_size', 'color_picker'],
         ],

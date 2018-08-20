@@ -272,6 +272,7 @@ export default function nvd3Vis(slice, payload) {
         if (fd.donut) {
           chart.donut(true);
         }
+        chart.showLabels(fd.show_labels);
         chart.labelsOutside(fd.labels_outside);
         chart.labelThreshold(0.05);  // Configure the minimum slice size for labels to show up
         if (fd.pie_label_type !== 'key_percent' && fd.pie_label_type !== 'key_value') {
@@ -490,6 +491,8 @@ export default function nvd3Vis(slice, payload) {
         chart.showLegend(fd.show_legend);
       }
     }
+    // This is needed for correct chart dimensions if a chart is rendered in a hidden container
+    chart.width(width);
     chart.height(height);
     slice.container.css('height', height + 'px');
 
