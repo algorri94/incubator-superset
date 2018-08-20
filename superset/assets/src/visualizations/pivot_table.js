@@ -45,6 +45,11 @@ module.exports = function (slice, payload) {
     // The plugin takes care of the scrolling so we don't need
     // overflow: 'auto' on the table.
     container.css('overflow', 'hidden');
+    let agg = container.find('table').find('tbody').children().last();
+    if(agg.children().first().html() === 'All') {
+        container.find('table').append($(document.createElement('tfoot')));
+        agg.detach().appendTo(container.find('table').find('tfoot'));
+    }
     const table = container.find('table').DataTable({
       paging: false,
       searching: false,
@@ -54,7 +59,7 @@ module.exports = function (slice, payload) {
       scrollX: true,
     });
     table.column('0').order('asc').draw();
-    fixDataTableBodyHeight(container.find('.dataTables_wrapper'), height);
+    fixDataTableBodyHeight(container.find('.dataTables_wrapper'), height, agg.height());
   } else {
     // When there is more than 1 group by column we just render the table, without using
     // the DataTable plugin, so we need to handle the scrolling ourselves.

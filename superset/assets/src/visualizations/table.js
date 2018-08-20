@@ -182,7 +182,7 @@ function tableVis(slice, payload) {
     scrollX: true,
   });
   fixDataTableBodyHeight(
-      container.find('.dataTables_wrapper'), height);
+      container.find('.dataTables_wrapper'), height, 0);
   // Sorting table by main column
   let sortBy;
   if (fd.timeseries_limit_metric) {
