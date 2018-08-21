@@ -8,11 +8,12 @@ import {
   handleComponentDrop,
 } from '../actions/dashboardLayout';
 
-function mapStateToProps({ dashboardLayout: undoableLayout, dashboardState }) {
+function mapStateToProps({ dashboardLayout: undoableLayout, dashboardState, dashboardInfo }) {
   return {
     dashboardLayout: undoableLayout.present,
     editMode: dashboardState.editMode,
     showBuilderPane: dashboardState.showBuilderPane,
+    dashboardInfo: dashboardInfo
   };
 }
 
