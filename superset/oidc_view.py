@@ -18,7 +18,7 @@ class AuthOIDCView(AuthOIDView):
 
             if user is None:
                 info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name', 'email'])
-                user = sm.add_user(info.get('preferred_username'), info.get('given_name'), info.get('family_name'),
+                user = sm.add_user(info.get('email').split("@")[0], info.get('given_name'), info.get('family_name'),
                                    info.get('email'), sm.find_role('Gamma'))
 
             login_user(user, remember=False)
