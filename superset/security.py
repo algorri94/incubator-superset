@@ -11,6 +11,8 @@ import logging
 from flask import g
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
+from flask_appbuilder.security.manager import AUTH_OID
+from flask_oidc import OpenIDConnect
 from sqlalchemy import or_
 
 from superset import sql_parse
@@ -364,3 +366,10 @@ class SupersetSecurityManager(SecurityManager):
         return pvm.permission.name in {
             'can_override_role_permissions', 'can_approve',
         }
+
+    def __init__(self,appbuilder):
+        super(SupersetSecurityManager, self).__init__(appbuilder)
+        if self.auth_type == AUTH_OID:
+            self.oid = OpenIDConnect(self.appbuilder.get_app)
+        self.authoidview = AuthOIDCView
+
