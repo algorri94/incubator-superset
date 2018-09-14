@@ -61,6 +61,7 @@ setup(
         'celery>=4.2.0',
         'colorama',
         'contextlib2',
+        'flask-oidc==1.1.0',
         'cryptography',
         'flask<1.0.0',
         'flask-appbuilder==1.10.0',  # known db migration with 1.11+
