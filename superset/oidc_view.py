@@ -2,7 +2,7 @@ from flask import request, redirect
 from flask_appbuilder import expose
 from flask_appbuilder.security.views import AuthOIDView
 from flask_login import login_user
-from urllib import quote
+from urllib import parse
 
 
 class AuthOIDCView(AuthOIDView):
@@ -35,4 +35,4 @@ class AuthOIDCView(AuthOIDView):
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
 
         return redirect(
-            oidc.client_secrets.get('issuer') + '/protocol/openid-connect/logout?redirect_uri=' + quote(redirect_url))
+            oidc.client_secrets.get('issuer') + '/protocol/openid-connect/logout?redirect_uri=' + parse.quote(redirect_url))
