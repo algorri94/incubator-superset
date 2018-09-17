@@ -13,7 +13,6 @@ import {
 import $ from 'jquery';
 
 import ControlHeader from '../ControlHeader';
-import Loading from '../../../components/Loading';
 import { t } from '../../../locales';
 import DatasourceModal from '../../../datasource/DatasourceModal';
 import ColumnOption from '../../../components/ColumnOption';

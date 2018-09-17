@@ -206,8 +206,8 @@ function TableVis(element, props) {
     scrollCollapse: true,
     scrollX: true,
   });
-  fixDataTableBodyHeight(
-      container.find('.dataTables_wrapper'), height, 0);
+
+  fixDataTableBodyHeight($container.find('.dataTables_wrapper'), height, 0);
   // Sorting table by main column
   let sortBy;
   const limitMetric = Array.isArray(timeseriesLimitMetric)

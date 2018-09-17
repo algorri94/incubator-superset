@@ -152,7 +152,6 @@ describe('Dashboard', () => {
     it('should call refresh if a filter is added', () => {
       const wrapper = setup({ dashboardState: overrideDashboardState });
       const refreshExceptSpy = sinon.spy(wrapper.instance(), 'refreshExcept');
-
       wrapper.setProps({
         dashboardState: {
           ...overrideDashboardState,
@@ -162,8 +161,6 @@ describe('Dashboard', () => {
           },
         },
       });
-      wrapper.instance().componentDidUpdate(prevProps);
-
       refreshExceptSpy.restore();
       expect(refreshExceptSpy.callCount).to.equal(1);
     });
@@ -171,14 +168,12 @@ describe('Dashboard', () => {
     it('should call refresh if a filter is removed', () => {
       const wrapper = setup({ dashboardState: overrideDashboardState });
       const refreshExceptSpy = sinon.spy(wrapper.instance(), 'refreshExcept');
-
       wrapper.setProps({
         dashboardState: {
           ...overrideDashboardState,
           filters: {},
         },
       });
-
       refreshExceptSpy.restore();
       expect(refreshExceptSpy.callCount).to.equal(1);
     });
@@ -186,7 +181,6 @@ describe('Dashboard', () => {
     it('should call refresh if a filter is changed', () => {
       const wrapper = setup({ dashboardState: overrideDashboardState });
       const refreshExceptSpy = sinon.spy(wrapper.instance(), 'refreshExcept');
-
       wrapper.setProps({
         dashboardState: {
           ...overrideDashboardState,
@@ -203,7 +197,6 @@ describe('Dashboard', () => {
     it('should not call refresh if filters change and refresh is false', () => {
       const wrapper = setup({ dashboardState: overrideDashboardState });
       const refreshExceptSpy = sinon.spy(wrapper.instance(), 'refreshExcept');
-
       wrapper.setProps({
         dashboardState: {
           ...overrideDashboardState,

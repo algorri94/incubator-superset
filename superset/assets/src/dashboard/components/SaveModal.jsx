@@ -103,16 +103,12 @@ class SaveModal extends React.PureComponent {
   }
 
   render() {
-    const { isV2Preview } = this.props;
     return (
       <ModalTrigger
         ref={this.setModalRef}
         isMenuItem={this.props.isMenuItem}
         triggerNode={this.props.triggerNode}
-        modalTitle={t(
-          'Save Dashboard%s',
-          isV2Preview ? ' (⚠️ all saved dashboards will be V2)' : '',
-        )}
+        modalTitle={t('Save Dashboard')}
         modalBody={
           <FormGroup>
             <Radio

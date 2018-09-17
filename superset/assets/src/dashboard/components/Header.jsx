@@ -36,7 +36,6 @@ const propTypes = {
   startPeriodicRender: PropTypes.func.isRequired,
   updateDashboardTitle: PropTypes.func.isRequired,
   editMode: PropTypes.bool.isRequired,
-  isV2Preview: PropTypes.bool.isRequired,
   setEditMode: PropTypes.func.isRequired,
   showBuilderPane: PropTypes.bool.isRequired,
   toggleBuilderPane: PropTypes.func.isRequired,

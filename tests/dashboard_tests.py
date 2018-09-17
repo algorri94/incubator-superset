@@ -84,7 +84,7 @@ class DashboardTests(SupersetTestCase):
         data = {
             'css': '',
             'expanded_slices': {},
-            'positions': dash.position_array,
+            'positions': positions,
             'dashboard_title': dash.dashboard_title,
         }
         url = '/superset/save_dash/{}/'.format(dash.id)
@@ -102,7 +102,7 @@ class DashboardTests(SupersetTestCase):
         data = {
             'css': '',
             'expanded_slices': {},
-            'positions': dash.position_array,
+            'positions': positions,
             'dashboard_title': dash.dashboard_title,
             'default_filters': default_filters,
         }
@@ -157,7 +157,7 @@ class DashboardTests(SupersetTestCase):
         data = {
             'css': '',
             'expanded_slices': {},
-            'positions': dash.position_array,
+            'positions': positions,
             'dashboard_title': 'new title',
         }
         url = '/superset/save_dash/{}/'.format(dash.id)
@@ -181,7 +181,7 @@ class DashboardTests(SupersetTestCase):
             'css': '',
             'duplicate_slices': False,
             'expanded_slices': {},
-            'positions': dash.position_array,
+            'positions': positions,
             'dashboard_title': 'Copy Of Births',
         }
 

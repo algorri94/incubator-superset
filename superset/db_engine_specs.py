@@ -136,11 +136,6 @@ class BaseEngineSpec(object):
             return type_code.upper()
 
     @classmethod
-    def get_datatype(cls, type_code):
-        if isinstance(type_code, basestring) and len(type_code):
-            return type_code.upper()
-
-    @classmethod
     def extra_table_metadata(cls, database, table_name, schema_name):
         """Returns engine-specific table metadata"""
         return {}
