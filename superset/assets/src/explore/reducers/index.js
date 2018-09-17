@@ -7,8 +7,6 @@ import messageToasts from '../../messageToasts/reducers';
 
 const impressionId = (state = '') => state;
 
-const impressionId = (state = '') => (state);
-
 export default combineReducers({
   charts,
   saveModal,
