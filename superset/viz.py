@@ -2092,6 +2092,17 @@ class BaseDeckGLViz(BaseViz):
             return [spatial.get('geohashCol')]
 
     @staticmethod
+    def parse_coordinates(s):
+        if not s:
+            return None
+        try:
+            p = Point(s)
+        except Exception:
+            raise SpatialException(
+                _('Invalid spatial point encountered: %s' % s))
+        return (p.latitude, p.longitude)
+
+    @staticmethod
     def reverse_geohash_decode(geohash_code):
         lat, lng = geohash.decode(geohash_code)
         return (lng, lat)
@@ -2103,17 +2114,6 @@ class BaseDeckGLViz(BaseViz):
             for o in df[key]
             if isinstance(o, (list, tuple))
         ]
-
-    @staticmethod
-    def parse_coordinates(s):
-        if not s:
-            return None
-        try:
-            p = Point(s)
-        except Exception:
-            raise SpatialException(
-                _('Invalid spatial point encountered: %s' % s))
-        return (p.latitude, p.longitude)
 
     def process_spatial_data_obj(self, key, df):
         spatial = self.form_data.get(key)
