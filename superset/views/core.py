@@ -1591,15 +1591,9 @@ class Superset(BaseSupersetView):
         return 'SUCCESS'
 
     @staticmethod
-    def _is_v2_dash(positions):
-        return (
-            isinstance(positions, dict) and
-            positions.get('DASHBOARD_VERSION_KEY') == 'v2'
-        )
-
-    @staticmethod
     def _set_dash_metadata(dashboard, data):
         positions = data['positions']
+
         # find slices in the position data
         slice_ids = []
         slice_id_to_name = {}
@@ -2117,16 +2111,9 @@ class Superset(BaseSupersetView):
         if request.args.get('json') == 'true':
             return json_success(json.dumps(bootstrap_data))
 
-        if dashboard_view == 'v2':
-            entry = 'dashboard'
-            template = 'superset/dashboard.html'
-        else:
-            entry = 'dashboard_deprecated'
-            template = 'superset/dashboard_v1_deprecated.html'
-
         return self.render_template(
-            template,
-            entry=entry,
+            'superset/dashboard.html',
+            entry='dashboard',
             standalone_mode=standalone_mode,
             title=dash.dashboard_title,
             bootstrap_data=json.dumps(bootstrap_data),
