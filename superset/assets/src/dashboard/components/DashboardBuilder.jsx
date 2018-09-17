@@ -84,8 +84,9 @@ class DashboardBuilder extends React.Component {
   }
 
   render() {
-    const { handleComponentDrop, dashboardLayout, editMode } = this.props;
+    const { handleComponentDrop, dashboardLayout, editMode, dashboardInfo } = this.props;
     const { tabIndex } = this.state;
+    const standalone_mode = dashboardInfo.standalone_mode;
     const dashboardRoot = dashboardLayout[DASHBOARD_ROOT_ID];
     const rootChildId = dashboardRoot.children[0];
     const topLevelTabs =
