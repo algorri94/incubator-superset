@@ -20,11 +20,13 @@ import AnnotationTypes, {
   requiresQuery,
 } from '../../../modules/AnnotationTypes';
 
-import { ALL_COLOR_SCHEMES } from '../../../modules/colors';
 import PopoverSection from '../../../components/PopoverSection';
 import ControlHeader from '../ControlHeader';
 import { nonEmpty } from '../../validators';
 import vizTypes from '../../visTypes';
+
+import { t } from '../../../locales';
+import { getScheme } from '../../../modules/ColorSchemeManager';
 
 const AUTOMATIC_COLOR = '';
 
@@ -36,6 +38,8 @@ const propTypes = {
   opacity: PropTypes.string,
   style: PropTypes.string,
   width: PropTypes.number,
+  showMarkers: PropTypes.bool,
+  hideLine: PropTypes.bool,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   overrides: PropTypes.object,
   show: PropTypes.bool,
@@ -61,6 +65,8 @@ const defaultProps = {
   opacity: '',
   style: 'solid',
   width: 1,
+  showMarkers: false,
+  hideLine: false,
   overrides: {},
   colorScheme: 'd3Category10',
   show: true,
@@ -78,7 +84,7 @@ export default class AnnotationLayer extends React.PureComponent {
   constructor(props) {
     super(props);
     const { name, annotationType, sourceType,
-      color, opacity, style, width, value,
+      color, opacity, style, width, showMarkers, hideLine, value,
       overrides, show, titleColumn, descriptionColumns,
       timeColumn, intervalEndColumn } = props;
     this.state = {
@@ -100,6 +106,8 @@ export default class AnnotationLayer extends React.PureComponent {
       opacity,
       style,
       width,
+      showMarkers,
+      hideLine,
       // refData
       isNew: !this.props.name,
       isLoadingOptions: true,
@@ -264,20 +272,20 @@ export default class AnnotationLayer extends React.PureComponent {
     let description = '';
     if (requiresQuery(sourceType)) {
       if (sourceType === ANNOTATION_SOURCE_TYPES.NATIVE) {
-        label = 'Annotation Layer';
-        description = 'Select the Annotation Layer you would like to use.';
+        label = t('Annotation Layer');
+        description = t('Select the Annotation Layer you would like to use.');
       } else {
-        label = 'Slice';
-        description = `Use a pre defined Superset Slice as a source for annotations and overlays. 
+        label = t('Chart');
+        description = `Use a pre defined Superset Chart as a source for annotations and overlays.
         'your chart must be one of these visualization types:
         '[${getSupportedSourceTypes(annotationType)
             .map(x => vizTypes[x].label).join(', ')}]'`;
       }
     } else if (annotationType === AnnotationTypes.FORMULA) {
-      label = 'Formula';
-      description = `Expects a formula with depending time parameter 'x'
+      label = t('Formula');
+      description = t(`Expects a formula with depending time parameter 'x'
         in milliseconds since epoch. mathjs is used to evaluate the formulas.
-        Example: '2x+5'`;
+        Example: '2x+5'`);
     }
     if (requiresQuery(sourceType)) {
       return (
@@ -292,7 +300,7 @@ export default class AnnotationLayer extends React.PureComponent {
           isLoading={isLoadingOptions}
           value={value}
           onChange={this.handleValue}
-          validationErrors={!value ? ['Mandatory'] : []}
+          validationErrors={!value ? [t('Mandatory')] : []}
         />
       );
     } if (annotationType === AnnotationTypes.FORMULA) {
@@ -306,7 +314,7 @@ export default class AnnotationLayer extends React.PureComponent {
           placeholder=""
           value={value}
           onChange={this.handleValue}
-          validationErrors={this.isValidFormula(value, annotationType) ? ['Bad formula.'] : []}
+          validationErrors={this.isValidFormula(value, annotationType) ? [t('Bad formula.')] : []}
         />
       );
     }
@@ -469,8 +477,8 @@ export default class AnnotationLayer extends React.PureComponent {
   }
 
   renderDisplayConfiguration() {
-    const { color, opacity, style, width } = this.state;
-    const colorScheme = [...ALL_COLOR_SCHEMES[this.props.colorScheme]];
+    const { color, opacity, style, width, showMarkers, hideLine, annotationType } = this.state;
+    const colorScheme = [...getScheme(this.props.colorScheme)];
     if (color && color !== AUTOMATIC_COLOR &&
       !colorScheme.find(x => x.toLowerCase() === color.toLowerCase())) {
       colorScheme.push(color);
@@ -479,12 +487,12 @@ export default class AnnotationLayer extends React.PureComponent {
       <PopoverSection
         isSelected
         onSelect={() => {}}
-        title="Display configuration"
-        info="Configure your how you overlay is displayed here."
+        title={t('Display configuration')}
+        info={t('Configure your how you overlay is displayed here.')}
       >
         <SelectControl
           name="annotation-layer-stroke"
-          label="Style"
+          label={t('Style')}
             // see '../../../visualizations/nvd3_vis.css'
           options={[
               { value: 'solid', label: 'Solid' },
@@ -497,7 +505,7 @@ export default class AnnotationLayer extends React.PureComponent {
         />
         <SelectControl
           name="annotation-layer-opacity"
-          label="Opacity"
+          label={t('Opacity')}
             // see '../../../visualizations/nvd3_vis.css'
           options={[
               { value: '', label: 'Solid' },
@@ -509,7 +517,7 @@ export default class AnnotationLayer extends React.PureComponent {
           onChange={v => this.setState({ opacity: v })}
         />
         <div>
-          <ControlHeader label="Color" />
+          <ControlHeader label={t('Color')} />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <CompactPicker
               color={color}
@@ -522,17 +530,37 @@ export default class AnnotationLayer extends React.PureComponent {
               bsSize="xsmall"
               onClick={() => this.setState({ color: AUTOMATIC_COLOR })}
             >
-              Automatic Color
+              {t('Automatic Color')}
             </Button>
           </div>
         </div>
         <TextControl
           name="annotation-layer-stroke-width"
-          label="Line Width"
+          label={t('Line Width')}
           isInt
           value={width}
           onChange={v => this.setState({ width: v })}
         />
+        {annotationType === AnnotationTypes.TIME_SERIES &&
+        <CheckboxControl
+          hovered
+          name="annotation-layer-show-markers"
+          label={t('Show Markers')}
+          description={t('Shows or hides markers for the time series')}
+          value={showMarkers}
+          onChange={v => this.setState({ showMarkers: v })}
+        />
+        }
+        {annotationType === AnnotationTypes.TIME_SERIES &&
+        <CheckboxControl
+          hovered
+          name="annotation-layer-hide-line"
+          label={t('Hide Line')}
+          description={t('Hides the Line for the time series')}
+          value={hideLine}
+          onChange={v => this.setState({ hideLine: v })}
+        />
+        }
       </PopoverSection>
     );
   }
@@ -554,27 +582,27 @@ export default class AnnotationLayer extends React.PureComponent {
             <PopoverSection
               isSelected
               onSelect={() => {}}
-              title="Layer Configuration"
-              info="Configure the basics of your Annotation Layer."
+              title={t('Layer Configuration')}
+              info={t('Configure the basics of your Annotation Layer.')}
             >
               <TextControl
                 name="annotation-layer-name"
-                label="Name"
+                label={t('Name')}
                 placeholder=""
                 value={name}
                 onChange={v => this.setState({ name: v })}
-                validationErrors={!name ? ['Mandatory'] : []}
+                validationErrors={!name ? [t('Mandatory')] : []}
               />
               <CheckboxControl
                 name="annotation-layer-hide"
-                label="Hide Layer"
+                label={t('Hide Layer')}
                 value={!show}
                 onChange={v => this.setState({ show: !v })}
               />
               <SelectControl
                 hovered
-                description="Choose the Annotation Layer Type"
-                label="Annotation Layer Type"
+                description={t('Choose the Annotation Layer Type')}
+                label={t('Annotation Layer Type')}
                 name="annotation-layer-type"
                 options={getSupportedAnnotationTypes(this.props.vizType).map(
                     x => ({ value: x, label: getAnnotationTypeLabel(x) }))}
@@ -584,8 +612,8 @@ export default class AnnotationLayer extends React.PureComponent {
               {!!getSupportedSourceTypes(annotationType).length &&
                 <SelectControl
                   hovered
-                  description="Choose the source of your annotations"
-                  label="Annotation Source"
+                  description={t('Choose the source of your annotations')}
+                  label={t('Annotation Source')}
                   name="annotation-source-type"
                   options={getSupportedSourceTypes(annotationType).map(
                         x => ({ value: x, label: getAnnotationSourceTypeLabels(x) }))}
@@ -604,7 +632,7 @@ export default class AnnotationLayer extends React.PureComponent {
             bsSize="sm"
             onClick={this.deleteAnnotation}
           >
-            { !isNew ? 'Remove' : 'Cancel' }
+            { !isNew ? t('Remove') : t('Cancel') }
           </Button>
           <div>
             <Button
@@ -612,7 +640,7 @@ export default class AnnotationLayer extends React.PureComponent {
               disabled={!isValid}
               onClick={this.applyAnnotation}
             >
-              Apply
+              {t('Apply')}
             </Button>
 
             <Button
@@ -620,7 +648,7 @@ export default class AnnotationLayer extends React.PureComponent {
               disabled={!isValid}
               onClick={this.submitAnnotation}
             >
-              OK
+              {t('OK')}
             </Button>
           </div>
         </div>

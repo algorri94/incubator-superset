@@ -92,6 +92,8 @@ Superset can be used to visualize data out of most databases:
 * MonetDB
 * Snowflake
 * Redshift
+* Clickhouse
+* Apache Kylin
 * **more!** look for the availability of a SQLAlchemy dialect for your database
   to find out whether it will work with Superset
 
@@ -129,6 +131,7 @@ Resources
 * [Docker image](https://hub.docker.com/r/amancevice/superset/) (community contributed)
 * [Slides from Strata (March 2016)](https://drive.google.com/open?id=0B5PVE0gzO81oOVJkdF9aNkJMSmM)
 * [Stackoverflow tag](https://stackoverflow.com/questions/tagged/apache-superset)
+* [Join our Slack](https://join.slack.com/t/apache-superset/shared_invite/enQtNDMxMDY5NjM4MDU0LTc2Y2QwYjE4NGYwNzQyZWUwYTExZTdiZDMzMWQwZjc2YmJmM2QyMDkwMGVjZTA4N2I2MzUxZTk2YmE5MWRhZWE)
 * [DEPRECATED Google Group](https://groups.google.com/forum/#!forum/airbnb_superset)
 
 
@@ -166,6 +169,7 @@ the world know they are using Superset. Join our growing community!
  - [Lime](https://www.limebike.com/)
  - [Lyft](https://www.lyft.com/)
  - [Maieutical Labs](https://maieuticallabs.it)
+ - [Myra Labs] (http://www.myralabs.com/)
  - [PeopleDoc](https://www.people-doc.com)
  - [Ona](https://ona.io)
  - [Pronto Tools](http://www.prontotools.io)
@@ -174,6 +178,7 @@ the world know they are using Superset. Join our growing community!
  - [Shopee](https://shopee.sg)
  - [Shopkick](https://www.shopkick.com)
  - [Tails.com](https://tails.com)
+ - [THEICONIC](http://theiconic.com.au/)
  - [Tobii](http://www.tobii.com/)
  - [Tooploox](https://www.tooploox.com/)
  - [Twitter](https://twitter.com/)

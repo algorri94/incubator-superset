@@ -1,7 +1,9 @@
+import URI from 'urijs';
+
 import { getExploreUrlAndPayload, getAnnotationJsonUrl } from '../explore/exploreUtils';
 import { requiresQuery, ANNOTATION_SOURCE_TYPES } from '../modules/AnnotationTypes';
 import { Logger, LOG_ACTIONS_LOAD_CHART } from '../logger';
-import { COMMON_ERR_MESSAGES } from '../common';
+import { COMMON_ERR_MESSAGES } from '../utils/common';
 import { t } from '../locales';
 
 const $ = (window.$ = require('jquery'));
@@ -146,7 +148,7 @@ export function runQuery(formData, force = false, timeout = 60, key) {
       .then(() => queryRequest)
       .then((queryResponse) => {
         Logger.append(LOG_ACTIONS_LOAD_CHART, {
-          slice_id: 'slice_' + key,
+          slice_id: key,
           is_cached: queryResponse.is_cached,
           force_refresh: force,
           row_count: queryResponse.rowcount,
@@ -160,7 +162,7 @@ export function runQuery(formData, force = false, timeout = 60, key) {
       })
       .catch((err) => {
         Logger.append(LOG_ACTIONS_LOAD_CHART, {
-          slice_id: 'slice_' + key,
+          slice_id: key,
           has_err: true,
           datasource: formData.datasource,
           start_offset: logStart,
@@ -198,6 +200,32 @@ export function runQuery(formData, force = false, timeout = 60, key) {
       dispatch(updateQueryFormData(payload, key)),
       ...annotationLayers.map(x => dispatch(runAnnotationQuery(x, timeout, formData, key))),
     ]);
+  };
+}
+
+export const SQLLAB_REDIRECT_FAILED = 'SQLLAB_REDIRECT_FAILED';
+export function sqllabRedirectFailed(error, key) {
+  return { type: SQLLAB_REDIRECT_FAILED, error, key };
+}
+
+export function redirectSQLLab(formData) {
+  return function (dispatch) {
+    const { url, payload } = getExploreUrlAndPayload({ formData, endpointType: 'query' });
+    $.ajax({
+      type: 'POST',
+      url,
+      data: {
+        form_data: JSON.stringify(payload),
+      },
+      success: (response) => {
+        const redirectUrl = new URI(window.location);
+        redirectUrl
+          .pathname('/superset/sqllab')
+          .search({ datasourceKey: formData.datasource, sql: response.query });
+        window.open(redirectUrl.href(), '_blank');
+      },
+      error: (xhr, status, error) => dispatch(sqllabRedirectFailed(error, formData.slice_id)),
+    });
   };
 }
 

@@ -271,6 +271,7 @@ class ExploreViewContainer extends React.Component {
               loading={this.props.chart.chartStatus === 'loading'}
               chartIsStale={this.state.chartIsStale}
               errorMessage={this.renderErrorMessage()}
+              datasourceType={this.props.datasource_type}
             />
             <br />
             <ControlPanelsContainer
@@ -292,12 +293,6 @@ ExploreViewContainer.propTypes = propTypes;
 
 function mapStateToProps({ explore, charts, impressionId }) {
   const form_data = getFormDataFromControls(explore.controls);
-  // fill in additional params stored in form_data but not used by control
-  Object.keys(explore.rawFormData).forEach((key) => {
-    if (form_data[key] === undefined) {
-      form_data[key] = explore.rawFormData[key];
-    }
-  });
   const chartKey = Object.keys(charts)[0];
   const chart = charts[chartKey];
   return {

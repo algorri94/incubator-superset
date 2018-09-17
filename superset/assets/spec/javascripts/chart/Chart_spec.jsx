@@ -38,10 +38,10 @@ describe('Chart', () => {
       <Chart {...mockedProps} />,
     );
   });
-  describe('renderViz', () => {
+  describe('renderVis', () => {
     let stub;
     beforeEach(() => {
-      stub = sinon.stub(wrapper.instance(), 'renderViz');
+      stub = sinon.stub(wrapper.instance(), 'renderVis');
     });
     afterEach(() => {
       stub.restore();
@@ -66,12 +66,10 @@ describe('Chart', () => {
     });
 
     it('should call after resize', () => {
-      const prevProp = wrapper.props();
       wrapper.setProps({
         chartStatus: 'rendered',
         height: 100,
       });
-      wrapper.instance().componentDidUpdate(prevProp);
       expect(stub.callCount).to.equals(1);
     });
   });

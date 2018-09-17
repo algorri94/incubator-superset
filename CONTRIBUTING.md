@@ -38,6 +38,9 @@ whether as part of the official Superset docs,
 in docstrings, `docs/*.rst` or even on the web as blog posts or
 articles.
 
+To build the docs, simply run ``./build.sh`` from the ``docs/`` folder.
+The rendered docs are accessible at `http://localhost:{PORT}/static/assets/docs/faq.html`.
+
 ### Submit Feedback
 
 The best way to send feedback is to file an issue on GitHub.
@@ -65,7 +68,7 @@ meets these guidelines:
 3.  If the pull request adds functionality, the docs should be updated
     as part of the same PR. Doc string are often sufficient, make
     sure to follow the sphinx compatible standards.
-4.  The pull request should work for Python 2.7, and ideally Python 3.4+.
+4.  The pull request should work for Python 2.7 and Python 3.6.
     ``from __future__ import`` will be required in every `.py` file soon.
 5.  If the pull request adds a Python dependency include it in `setup.py`
     denoting any specific restrictions and in `requirements.txt` pinned to a
@@ -200,7 +203,7 @@ Check the [OS dependencies](https://superset.incubator.apache.org/installation.h
     superset runserver -d
 
 
-### Logging to the browser console
+### Logging to the browser console (Python 3 only)
 
 When debugging your application, you can have the server logs sent directly to the browser console:
 
@@ -258,23 +261,52 @@ To parse and generate bundled files for superset, run either of the
 following commands. The `dev` flag will keep the npm script running and
 re-run it upon any changes within the assets directory.
 
-```
+```bash
 # Copies a conf file from the frontend to the backend
 npm run sync-backend
 
 # Compiles the production / optimized js & css
 npm run prod
 
+# Start a watcher that rebundle your assets as you modify them
+npm run dev
+
 # Start a web server that manages and updates your assets as you modify them
-npm run dev
+npm run dev-server
 ```
 
-For every development session you will have to start a flask dev server
-as well as an npm watcher
+For every development session you will have to
 
-```
+1. Start a flask dev server
+
+```bash
+superset runserver -d
+# or specify port
 superset runserver -d -p 8081
-npm run dev
+```
+
+2. Start webpack dev server
+
+```bash
+npm run dev-server
+```
+
+This will start `webpack-dev-server` at port 9000 and you can access Superset at localhost:9000.
+By default, `webpack-dev-server` is configured for flask running at port 8088.
+
+If you start flask server at another port (e.g. 8081), you have to pass an extra argument
+`supersetPort` to `webpack-dev-server`
+
+```bash
+npm run dev-server -- --supersetPort=8081
+```
+
+You can also specify port for `webpack-dev-server`
+
+```bash
+npm run dev-server -- --port=9001
+# or with both dev-server port and superset port
+npm run dev-server -- --port=9001 --supersetPort=8081
 ```
 
 #### Upgrading npm packages
@@ -291,7 +323,7 @@ All python tests can be run with any of the tox [environments](http://tox.readth
 i.e.,
 
     tox -e py27
-    tox -e py34
+    tox -e py36
 
 Alternatively, you can run all tests in a single file via,
 
@@ -310,6 +342,21 @@ We use [Mocha](https://mochajs.org/), [Chai](http://chaijs.com/) and [Enzyme](ht
     cd /superset/superset/assets/javascripts
     npm i
     npm run test
+
+We use [Cypress](https://www.cypress.io/) for integration tests. Tests can be run by `tox -e cypress`. To open Cypress and explore tests first setup and run test server:
+
+    export SUPERSET_CONFIG=tests.superset_test_config
+    superset load_test_users
+    superset db upgrade
+    superset init
+    superset load_examples
+    superset runserver
+
+Open Cypress tests:
+
+    cd /superset/superset/assets
+    npm run build
+    npm run cypress run
 
 ## Linting
 
@@ -493,7 +540,7 @@ https://github.com/apache/incubator-superset/pull/3013
   In the future we'll start publishing release candidates for minor releases
   only, but typically not for micro release.
   The process will be similar to the process described above, expect the
-  tags will be formated `0.25.0rc1`, `0.25.0rc2`, ..., until consensus
+  tags will be formatted `0.25.0rc1`, `0.25.0rc2`, ..., until consensus
   is reached.
 
   We should also have a Github PR label process to target the proper
@@ -505,3 +552,54 @@ https://github.com/apache/incubator-superset/pull/3013
   with a PGP key and providing MD5, Apache voting, as well as
   publishing to Apache's SVN repository. View the ASF docs for more
   information.
+
+
+## Merging DB migrations
+
+When 2 db migrations collide, you'll get an error message like this one:
+
+```
+  alembic.util.exc.CommandError: Multiple head revisions are present for
+  given argument 'head'; please specify a specific target
+  revision, '<branchname>@head' to narrow to a specific head,
+  or 'heads' for all heads`
+```
+
+To fix it, first run `superset db heads`, this should list 2 or more
+migration hashes. Then run
+`superset db merge {PASTE_SHA1_HERE} {PASTE_SHA2_HERE}`. This will create
+a new merge migration. You can then `superset db upgrade` to this new
+checkpoint.
+
+
+## Running DB migration
+
+1. First alter the model you want to change. For example I want to add a `Column` Annotations model.
+
+https://github.com/apache/incubator-superset/commit/6c25f549384d7c2fc288451222e50493a7b14104
+
+
+2. superset db migrate -m "this_will_be_in_the_migration_filename"
+
+For our example we'll be running this command:
+```
+superset db migrate -m "add_metadata_column_to_annotation_model.py"
+```
+
+This will generate a file in `superset/migrations/version/{SHA}_this_will_be_in_the_migration_filename.py`
+
+https://github.com/apache/incubator-superset/commit/d3e83b0fd572c9d6c1297543d415a332858e262
+
+3. Run `superset db upgrade`
+
+The output should look like this:
+```
+INFO  [alembic.runtime.migration] Context impl SQLiteImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+INFO  [alembic.runtime.migration] Running upgrade 1a1d627ebd8e -> 40a0a483dd12, add_metadata_column_to_annotation_model.py
+```
+
+4. Add column to view
+Since there is a new column, we need to add it to the AppBuilder Model view.
+
+https://github.com/apache/incubator-superset/pull/5745/commits/6220966e2a0a0cf3e6d87925491f8920fe8a3458

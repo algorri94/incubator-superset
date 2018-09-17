@@ -1,3 +1,5 @@
+/* global window */
+/* eslint no-undef: 2 */
 import React from 'react';
 import PropTypes from 'prop-types';
 import throttle from 'lodash.throttle';
@@ -87,7 +89,7 @@ class SqlEditor extends React.PureComponent {
       height,
     });
 
-    if (this.refs.ace.clientHeight) {
+    if (this.refs.ace && this.refs.ace.clientHeight) {
       this.props.actions.persistEditorHeight(this.props.queryEditor, this.refs.ace.clientHeight);
     }
   }
@@ -97,8 +99,14 @@ class SqlEditor extends React.PureComponent {
   getHotkeyConfig() {
     return [
       {
-        name: 'runQuery',
+        name: 'runQuery1',
         key: 'ctrl+r',
+        descr: 'Run query',
+        func: this.runQuery,
+      },
+      {
+        name: 'runQuery2',
+        key: 'ctrl+enter',
         descr: 'Run query',
         func: this.runQuery,
       },
@@ -126,7 +134,7 @@ class SqlEditor extends React.PureComponent {
     this.props.actions.queryEditorSetSql(this.props.queryEditor, sql);
   }
   runQuery() {
-    this.startQuery(!this.props.database.allow_run_sync);
+    this.startQuery(!(this.props.database || {}).allow_run_sync);
   }
   startQuery(runAsync = false, ctas = false) {
     const qe = this.props.queryEditor;
@@ -234,7 +242,7 @@ class SqlEditor extends React.PureComponent {
             {ctasControls}
             <span className="m-l-5">
               <Hotkeys
-                header="Hotkeys"
+                header="Keyboard shortcuts"
                 hotkeys={hotkeys}
               />
             </span>

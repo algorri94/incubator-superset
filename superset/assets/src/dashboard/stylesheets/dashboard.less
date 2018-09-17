@@ -129,10 +129,38 @@ body {
   }
 }
 
-.modal img.loading {
-  width: 50px;
-  margin: 0;
-  position: relative;
+.modal {
+  img.loading {
+    width: 50px;
+    margin: 0;
+    position: relative;
+  }
+
+  .modal-body {
+    padding: 24px 24px 29px 24px;
+
+    div {
+      margin-top: 24px;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+  }
+
+  .delete-modal-actions-container {
+    .btn {
+      margin-right: 16px;
+      &:last-child {
+        margin-right: 0;
+      }
+
+      &.btn-primary {
+        background: @pink !important;
+        border-color: @pink !important;
+      }
+    }
+  }
 }
 
 .react-bs-container-body {
@@ -166,28 +194,6 @@ body {
     font-size: 24px;
     position: relative;
     margin-left: 8px;
-  }
-
-  /* @TODO remove upon v1 deprecation */
-  .v2-preview-badge {
-    margin-left: 8px;
-    text-transform: uppercase;
-    font-size: 12px;
-    font-weight: 400;
-    background: linear-gradient(to bottom right, @pink, @purple);
-    color: white;
-    padding: 4px 8px;
-    line-height: 1em;
-    cursor: pointer;
-    opacity: 0.9;
-    flex-wrap: nowrap;
-    display: flex;
-    align-items: center;
-    white-space: nowrap;
-
-    &:hover {
-      opacity: 1;
-    }
   }
 }
 

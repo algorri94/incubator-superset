@@ -4,9 +4,9 @@ Installation & Configuration
 Getting Started
 ---------------
 
-Superset is tested against Python ``2.7`` and Python ``3.4``.
-Airbnb currently uses 2.7.* in production. We do not plan on supporting
-Python ``2.6``.
+Superset is currently tested against Python ``2.7`` and Python ``3.6``.
+Python 3.6 is preferred. Support for Python ``<=3.6`` is planned to get
+phased out.
 
 Cloud-native!
 -------------
@@ -50,8 +50,11 @@ initialize development environment: ::
     docker-compose exec superset bash
     bash docker-init.sh
 
-After several minutes for sueprset initialization to finish, you can open a 
+After several minutes for superset initialization to finish, you can open
 a browser and view `http://localhost:8088` to start your journey.
+
+If you are attempting to build on a Mac and it exits with 137 you need to increase your docker resources.
+OSX instructions: https://docs.docker.com/docker-for-mac/#advanced (Search for memory)
 
 Or if you're curious and want to install superset from bottom up, then go 
 ahead.
@@ -74,7 +77,7 @@ the required dependencies are installed: ::
 
     sudo apt-get install build-essential libssl-dev libffi-dev python-dev python-pip libsasl2-dev libldap2-dev
 
-**Ubuntu 16.04** If you have python3.5 installed alongside with python2.7, as is default on **Ubuntu 16.04 LTS**, run this command also
+**Ubuntu 16.04** If you have python3.5 installed alongside with python2.7, as is default on **Ubuntu 16.04 LTS**, run this command also: ::
 
     sudo apt-get install build-essential libssl-dev libffi-dev python3.5-dev python-pip libsasl2-dev libldap2-dev
 
@@ -200,7 +203,8 @@ workers this creates a lot of contention and race conditions when defining
 permissions and views.
 
 To alleviate this issue, the automatic updating of permissions can be disabled
-by setting the :envvar:`SUPERSET_UPDATE_PERMS` environment variable to `0`.
+by setting the environment variable
+`SUPERSET_UPDATE_PERMS` environment variable to `0`.
 The value `1` enables it, `0` disables it. Note if undefined the functionality
 is enabled to maintain backwards compatibility.
 
@@ -295,6 +299,9 @@ auth postback endpoint, you can add them to *WTF_CSRF_EXEMPT_LIST*
 
      WTF_CSRF_EXEMPT_LIST = ['']
 
+
+.. _ref_database_deps:
+
 Database dependencies
 ---------------------
 
@@ -364,11 +371,33 @@ Where you need to escape/encode at least the s3_staging_dir, i.e., ::
 
     s3://... -> s3%3A//...
 
-You can also use `PyAthena` library
+You can also use `PyAthena` library(no java required) like this ::
 
     awsathena+rest://{aws_access_key_id}:{aws_secret_access_key}@athena.{region_name}.amazonaws.com/{schema_name}?s3_staging_dir={s3_staging_dir}&...
 
-_(See more details at https://github.com/laughingman7743/PyAthena#sqlalchemy.)_
+See `PyAthena <https://github.com/laughingman7743/PyAthena#sqlalchemy>`_.
+
+Snowflake
+---------
+
+The connection string for Snowflake looks like this ::
+
+    snowflake://{user}:{password}@{account}.{region}/{database}?role={role}&warehouse={warehouse}
+
+The schema is not necessary in the connection string, as it is defined per table/query.
+The role and warehouse can be omitted if defaults are defined for the user, i.e.
+
+    snowflake://{user}:{password}@{account}.{region}/{database}
+
+Make sure the user has privileges to access and use all required
+databases/schemas/tables/views/warehouses, as the Snowflake SQLAlchemy engine does
+not test for user rights during engine creation.
+
+*Note*: At the time of writing, there is a regression in the current stable version (1.1.2) of
+snowflake-sqlalchemy package that causes problems when used with Superset. It is recommended to
+use version 1.1.0 or try a newer version.
+
+See `Snowflake SQLAlchemy <https://github.com/snowflakedb/snowflake-sqlalchemy>`_.
 
 Caching
 -------
@@ -683,7 +712,7 @@ Note that it's also possible to implement you own logger by deriving
 
 
 Install Superset with helm in Kubernetes
---------------
+----------------------------------------
 
 You can install Superset into Kubernetes with Helm <https://helm.sh/>. The chart is
 located in ``install/helm``.
@@ -706,7 +735,6 @@ The first step: Configure authorization in Superset ``superset_config.py``.
 .. code-block:: python
 
     AUTH_TYPE = AUTH_OAUTH
-    
     OAUTH_PROVIDERS = [
         {   'name':'egaSSO',
             'token_key':'access_token', # Name of the token in the response of access_token_url

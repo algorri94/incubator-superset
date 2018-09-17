@@ -22,7 +22,6 @@ const propTypes = {
   onSave: PropTypes.func.isRequired,
   isMenuItem: PropTypes.bool,
   canOverwrite: PropTypes.bool.isRequired,
-  isV2Preview: PropTypes.bool.isRequired,
 };
 
 const defaultProps = {
@@ -144,7 +143,7 @@ class SaveModal extends React.PureComponent {
                 checked={this.state.duplicateSlices}
                 onChange={this.toggleDuplicateSlices}
               />
-              <span className="m-l-5">also copy (duplicate) charts</span>
+              <span className="m-l-5">{t('also copy (duplicate) charts')}</span>
             </div>
           </FormGroup>
         }

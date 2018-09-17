@@ -27,23 +27,26 @@ INFER_COL_TYPES_THRESHOLD = 95
 INFER_COL_TYPES_SAMPLE_SIZE = 100
 
 
-def dedup(l, suffix='__'):
+def dedup(l, suffix='__', case_sensitive=True):
     """De-duplicates a list of string by suffixing a counter
 
     Always returns the same number of entries as provided, and always returns
-    unique values.
+    unique values. Case sensitive comparison by default.
 
-    >>> print(','.join(dedup(['foo', 'bar', 'bar', 'bar'])))
-    foo,bar,bar__1,bar__2
+    >>> print(','.join(dedup(['foo', 'bar', 'bar', 'bar', 'Bar'])))
+    foo,bar,bar__1,bar__2,Bar
+    >>> print(','.join(dedup(['foo', 'bar', 'bar', 'bar', 'Bar'], case_sensitive=False)))
+    foo,bar,bar__1,bar__2,Bar__3
     """
     new_l = []
     seen = {}
     for s in l:
-        if s in seen:
-            seen[s] += 1
-            s += suffix + str(seen[s])
+        s_fixed_case = s if case_sensitive else s.lower()
+        if s_fixed_case in seen:
+            seen[s_fixed_case] += 1
+            s += suffix + str(seen[s_fixed_case])
         else:
-            seen[s] = 0
+            seen[s_fixed_case] = 0
         new_l.append(s)
     return new_l
 
@@ -70,12 +73,11 @@ class SupersetDataFrame(object):
         if cursor_description:
             column_names = [col[0] for col in cursor_description]
 
-        self.column_names = dedup(
-            db_engine_spec.get_normalized_column_names(cursor_description))
+        self.column_names = dedup(column_names)
 
         data = data or []
         self.df = (
-            pd.DataFrame(list(data), columns=column_names).infer_objects())
+            pd.DataFrame(list(data), columns=self.column_names).infer_objects())
 
         self._type_dict = {}
         try:
@@ -128,10 +130,19 @@ class SupersetDataFrame(object):
                 continue
         return 100 * success / total
 
-    @classmethod
-    def is_date(cls, dtype):
-        if dtype.name:
-            return dtype.name.startswith('datetime')
+    @staticmethod
+    def is_date(np_dtype, db_type_str):
+
+        def looks_daty(s):
+            if isinstance(s, basestring):
+                return any([s.lower().startswith(ss) for ss in ('time', 'date')])
+            return False
+
+        if looks_daty(db_type_str):
+            return True
+        if np_dtype and np_dtype.name and looks_daty(np_dtype.name):
+            return True
+        return False
 
     @classmethod
     def is_dimension(cls, dtype, column_name):
@@ -168,19 +179,19 @@ class SupersetDataFrame(object):
         if sample_size:
             sample = self.df.sample(sample_size)
         for col in self.df.dtypes.keys():
-            col_db_type = (
+            db_type_str = (
                 self._type_dict.get(col) or
                 self.db_type(self.df.dtypes[col])
             )
             column = {
                 'name': col,
                 'agg': self.agg_func(self.df.dtypes[col], col),
-                'type': col_db_type,
-                'is_date': self.is_date(self.df.dtypes[col]),
+                'type': db_type_str,
+                'is_date': self.is_date(self.df.dtypes[col], db_type_str),
                 'is_dim': self.is_dimension(self.df.dtypes[col], col),
             }
 
-            if column['type'] in ('OBJECT', None):
+            if not db_type_str or db_type_str.upper() == 'OBJECT':
                 v = sample[col].iloc[0] if not sample[col].empty else None
                 if isinstance(v, basestring):
                     column['type'] = 'STRING'

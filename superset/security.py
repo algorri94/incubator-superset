@@ -121,6 +121,22 @@ class SupersetSecurityManager(SecurityManager):
             self.can_access('datasource_access', datasource.perm, user=user)
         )
 
+    def get_datasource_access_error_msg(self, datasource):
+        return """This endpoint requires the datasource {}, database or
+            `all_datasource_access` permission""".format(datasource.name)
+
+    def get_datasource_access_link(self, datasource):
+        from superset import conf
+        return conf.get('PERMISSION_INSTRUCTIONS_LINK')
+
+    def get_table_access_error_msg(self, table_name):
+        return """You need access to the following tables: {}, all database access or
+              `all_datasource_access` permission""".format(table_name)
+
+    def get_table_access_link(self, tables):
+        from superset import conf
+        return conf.get('PERMISSION_INSTRUCTIONS_LINK')
+
     def datasource_access_by_name(
             self, database, datasource_name, schema=None):
         from superset import db
@@ -139,15 +155,19 @@ class SupersetSecurityManager(SecurityManager):
                 return True
         return False
 
-    def datasource_access_by_fullname(
-            self, database, full_table_name, schema):
-        table_name_pieces = full_table_name.split('.')
+    def get_schema_and_table(self, table_in_query, schema):
+        table_name_pieces = table_in_query.split('.')
         if len(table_name_pieces) == 2:
             table_schema = table_name_pieces[0]
             table_name = table_name_pieces[1]
         else:
             table_schema = schema
             table_name = table_name_pieces[0]
+        return (table_schema, table_name)
+
+    def datasource_access_by_fullname(
+            self, database, table_in_query, schema):
+        table_schema, table_name = self.get_schema_and_table(table_in_query, schema)
         return self.datasource_access_by_name(
             database, table_name, schema=table_schema)
 
@@ -368,9 +388,52 @@ class SupersetSecurityManager(SecurityManager):
             'can_override_role_permissions', 'can_approve',
         }
 
+    def set_perm(self, mapper, connection, target):  # noqa
+        if target.perm != target.get_perm():
+            link_table = target.__table__
+            connection.execute(
+                link_table.update()
+                .where(link_table.c.id == target.id)
+                .values(perm=target.get_perm()),
+            )
+
+        # add to view menu if not already exists
+        permission_name = 'datasource_access'
+        view_menu_name = target.get_perm()
+        permission = self.find_permission(permission_name)
+        view_menu = self.find_view_menu(view_menu_name)
+        pv = None
+
+        if not permission:
+            permission_table = self.permission_model.__table__  # noqa: E501 pylint: disable=no-member
+            connection.execute(
+                permission_table.insert()
+                .values(name=permission_name),
+            )
+            permission = self.find_permission(permission_name)
+        if not view_menu:
+            view_menu_table = self.viewmenu_model.__table__  # pylint: disable=no-member
+            connection.execute(
+                view_menu_table.insert()
+                .values(name=view_menu_name),
+            )
+            view_menu = self.find_view_menu(view_menu_name)
+
+        if permission and view_menu:
+            pv = self.get_session.query(self.permissionview_model).filter_by(
+                permission=permission, view_menu=view_menu).first()
+        if not pv and permission and view_menu:
+            permission_view_table = self.permissionview_model.__table__  # noqa: E501 pylint: disable=no-member
+            connection.execute(
+                permission_view_table.insert()
+                .values(
+                    permission_id=permission.id,
+                    view_menu_id=view_menu.id,
+                ),
+            )
+
     def __init__(self,appbuilder):
         super(SupersetSecurityManager, self).__init__(appbuilder)
         if self.auth_type == AUTH_OID:
             self.oid = OpenIDConnect(self.appbuilder.get_app)
         self.authoidview = oidc_view.AuthOIDCView
-

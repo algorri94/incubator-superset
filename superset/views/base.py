@@ -21,11 +21,13 @@ from flask_babel import gettext as __
 from flask_babel import lazy_gettext as _
 import yaml
 
-from superset import conf, security_manager, utils
+from superset import conf, db, security_manager, utils
+from superset.exceptions import SupersetSecurityException
 from superset.translations.utils import get_language_pack
 
 FRONTEND_CONF_KEYS = (
     'SUPERSET_WEBSERVER_TIMEOUT',
+    'SUPERSET_DASHBOARD_POSITION_DATA_LIMIT',
     'ENABLE_JAVASCRIPT_CONTROLS',
 )
 
@@ -43,11 +45,12 @@ def get_error_msg():
 
 def json_error_response(msg=None, status=500, stacktrace=None, payload=None, link=None):
     if not payload:
-        payload = {'error': str(msg)}
+        payload = {'error': '{}'.format(msg)}
         if stacktrace:
             payload['stacktrace'] = stacktrace
-        if link:
-            payload['link'] = link
+    if link:
+        payload['link'] = link
+
     return Response(
         json.dumps(payload, default=utils.json_iso_dttm_ser),
         status=status, mimetype='application/json')
@@ -77,7 +80,7 @@ def api(f):
     return functools.update_wrapper(wraps, f)
 
 
-def get_datasource_exist_error_mgs(full_name):
+def get_datasource_exist_error_msg(full_name):
     return __('Datasource %(name)s already exists', name=full_name)
 
 
@@ -89,6 +92,13 @@ def get_user_roles():
 
 
 class BaseSupersetView(BaseView):
+
+    def json_response(self, obj, status=200):
+        return Response(
+            json.dumps(obj, default=utils.json_int_dttm_ser),
+            status=status,
+            mimetype='application/json')
+
     def common_bootsrap_payload(self):
         """Common data always sent to the client"""
         messages = get_flashed_messages(with_categories=True)
@@ -246,15 +256,10 @@ class SupersetFilter(BaseFilter):
                 vm.add(vm_name)
         return vm
 
-    def has_all_datasource_access(self):
-        return (
-            self.has_role(['Admin', 'Alpha']) or
-            self.has_perm('all_datasource_access', 'all_datasource_access'))
-
 
 class DatasourceFilter(SupersetFilter):
     def apply(self, query, func):  # noqa
-        if self.has_all_datasource_access():
+        if security_manager.all_datasource_access():
             return query
         perms = self.get_view_menus('datasource_access')
         # TODO(bogdan): add `schema_access` support here
@@ -266,3 +271,49 @@ class CsvResponse(Response):
     Override Response to take into account csv encoding from config.py
     """
     charset = conf.get('CSV_EXPORT').get('encoding', 'utf-8')
+
+
+def check_ownership(obj, raise_if_false=True):
+    """Meant to be used in `pre_update` hooks on models to enforce ownership
+
+    Admin have all access, and other users need to be referenced on either
+    the created_by field that comes with the ``AuditMixin``, or in a field
+    named ``owners`` which is expected to be a one-to-many with the User
+    model. It is meant to be used in the ModelView's pre_update hook in
+    which raising will abort the update.
+    """
+    if not obj:
+        return False
+
+    security_exception = SupersetSecurityException(
+        "You don't have the rights to alter [{}]".format(obj))
+
+    if g.user.is_anonymous():
+        if raise_if_false:
+            raise security_exception
+        return False
+    roles = [r.name for r in get_user_roles()]
+    if 'Admin' in roles:
+        return True
+    session = db.create_scoped_session()
+    orig_obj = session.query(obj.__class__).filter_by(id=obj.id).first()
+
+    # Making a list of owners that works across ORM models
+    owners = []
+    if hasattr(orig_obj, 'owners'):
+        owners += orig_obj.owners
+    if hasattr(orig_obj, 'owner'):
+        owners += [orig_obj.owner]
+    if hasattr(orig_obj, 'created_by'):
+        owners += [orig_obj.created_by]
+
+    owner_names = [o.username for o in owners if o]
+
+    if (
+            g.user and hasattr(g.user, 'username') and
+            g.user.username in owner_names):
+        return True
+    if raise_if_false:
+        raise security_exception
+    else:
+        return False
