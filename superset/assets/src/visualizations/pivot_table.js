@@ -72,13 +72,13 @@ function PivotTable(element, props) {
     // we use the DataTable plugin to make the header fixed.
     // The plugin takes care of the scrolling so we don't need
     // overflow: 'auto' on the table.
-    container.css('overflow', 'hidden');
-    let agg = container.find('table').find('tbody').children().last();
+    container.style.overflow = 'hidden';
+    let agg = $container.find('table tbody').children().last();
     if(agg.children().first().html() === 'All') {
-        container.find('table').append($(document.createElement('tfoot')));
-        agg.detach().appendTo(container.find('table').find('tfoot'));
+        $container.find('table').append($(document.createElement('tfoot')));
+        agg.detach().appendTo($container.find('table tfoot'));
     }
-    const table = container.find('table').DataTable({
+    const table = $container.find('table').DataTable({
       paging: false,
       searching: false,
       bInfo: false,
@@ -87,7 +87,7 @@ function PivotTable(element, props) {
       scrollX: true,
     });
     table.column('0').order('asc').draw();
-    fixDataTableBodyHeight(container.find('.dataTables_wrapper'), height, agg.height());
+    fixDataTableBodyHeight($container.find('.dataTables_wrapper'), height, agg.height());
   } else {
     // When there is more than 1 group by column we just render the table, without using
     // the DataTable plugin, so we need to handle the scrolling ourselves.
