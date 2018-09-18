@@ -62,6 +62,7 @@ function WorldMap(element, props) {
   const map = new Datamap({
     element,
     data: processedData,
+    done: zoom,
     fills: {
       defaultFill: '#ddd',
     },
@@ -107,6 +108,13 @@ function WorldMap(element, props) {
   }
 }
 
+function zoom(datamap){
+    datamap.svg.call(d3.behavior.zoom().on("zoom", redraw));
+    function redraw() {
+        datamap.svg.selectAll("g").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+    }
+}
+
 WorldMap.propTypes = propTypes;
 
 function adaptor(slice, payload) {
@@ -124,5 +132,6 @@ function adaptor(slice, payload) {
     showBubbles,
   });
 }
+
 
 export default adaptor;
