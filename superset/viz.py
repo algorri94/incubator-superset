@@ -1769,7 +1769,7 @@ class WorldMapViz(BaseViz):
                 row['name'] = country['name']
             else:
                 row['country'] = 'XXX'
-        return d
+        return dict(data=d, metric1=metric, metric2=secondary_metric)
 
 
 class FilterBoxViz(BaseViz):
