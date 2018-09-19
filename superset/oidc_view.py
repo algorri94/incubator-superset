@@ -17,9 +17,8 @@ class AuthOIDCView(AuthOIDView):
             user = sm.auth_user_oid(oidc.user_getfield('email'))
 
             if user is None:
-                info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name', 'email'])
-                user = sm.add_user(info.get('preferred_username'), info.get('given_name'), info.get('family_name'),
-                                   info.get('email'), sm.find_role('Gamma'))
+                user = sm.add_user(oidc.user_getfield('email'), '', '',
+                                   oidc.user_getfield('email'), sm.find_role('Gamma'))
 
             login_user(user, remember=False)
             return redirect(self.appbuilder.get_url_for_index)
@@ -29,15 +28,9 @@ class AuthOIDCView(AuthOIDView):
     @expose('/logout/', methods=['GET', 'POST'])
     def logout(self):
         oidc = self.appbuilder.sm.oid
-
-        @self.appbuilder.sm.oid.require_login
-        def handle_logout():
-            token = oidc.get_access_token()
-            oidc.logout()
-            super(AuthOIDCView, self).logout()
-            return token
-
-        token = handle_logout()
+        token = oidc.get_cookie_id_token()
+        oidc.logout()
+        super(AuthOIDCView, self).logout()
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
 
         return redirect(
