@@ -3,6 +3,7 @@ from flask_appbuilder import expose
 from flask_appbuilder.security.views import AuthOIDView
 from flask_login import login_user
 from urllib import parse
+import logging
 
 
 class AuthOIDCView(AuthOIDView):
@@ -29,6 +30,8 @@ class AuthOIDCView(AuthOIDView):
     def logout(self):
         oidc = self.appbuilder.sm.oid
         token = oidc.get_cookie_id_token()
+        logger = logging.getLogger('oidc_view')
+        logger.info(token)
         oidc.logout()
         super(AuthOIDCView, self).logout()
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
