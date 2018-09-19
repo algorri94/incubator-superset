@@ -17,8 +17,9 @@ class AuthOIDCView(AuthOIDView):
             user = sm.auth_user_oid(oidc.user_getfield('email'))
 
             if user is None:
-                user = sm.add_user(oidc.user_getfield('email').split("@")[0], '', '',
-                                   oidc.user_getfield('email'), sm.find_role('Gamma'))
+                info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name', 'email'])
+                user = sm.add_user(info.get('preferred_username'), info.get('given_name'), info.get('family_name'),
+                                   info.get('email'), sm.find_role('Gamma'))
 
             login_user(user, remember=False)
             return redirect(self.appbuilder.get_url_for_index)
@@ -34,4 +35,4 @@ class AuthOIDCView(AuthOIDView):
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
 
         return redirect(
-            oidc.client_secrets.get('issuer') + '/protocol/openid-connect/logout?redirect_uri=' + parse.quote(redirect_url))
+            oidc.client_secrets.get('issuer') + '/session/end?redirect_uri=' + parse.quote(redirect_url))
