@@ -12,7 +12,7 @@ from flask import g
 from flask_appbuilder.security.sqla import models as ab_models
 from flask_appbuilder.security.sqla.manager import SecurityManager
 from flask_appbuilder.security.manager import AUTH_OID
-from flask_oidc import OpenIDConnect
+from flask_oidc import OpenIDConnect, MemoryCredentials
 from sqlalchemy import or_
 from superset import oidc_view
 
@@ -435,5 +435,5 @@ class SupersetSecurityManager(SecurityManager):
     def __init__(self,appbuilder):
         super(SupersetSecurityManager, self).__init__(appbuilder)
         if self.auth_type == AUTH_OID:
-            self.oid = OpenIDConnect(self.appbuilder.get_app)
+            self.oid = OpenIDConnect(self.appbuilder.get_app, MemoryCredentials())
         self.authoidview = oidc_view.AuthOIDCView

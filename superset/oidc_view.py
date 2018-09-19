@@ -29,9 +29,7 @@ class AuthOIDCView(AuthOIDView):
     @expose('/logout/', methods=['GET', 'POST'])
     def logout(self):
         oidc = self.appbuilder.sm.oid
-        token = oidc.get_cookie_id_token()['sid']
-        logger = logging.getLogger('oidc_view')
-        logger.info(token)
+        token = oidc.get_access_token()
         oidc.logout()
         super(AuthOIDCView, self).logout()
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
