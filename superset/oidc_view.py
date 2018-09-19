@@ -35,4 +35,4 @@ class AuthOIDCView(AuthOIDView):
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
 
         return redirect(
-            oidc.client_secrets.get('issuer') + '/session/end?redirect_uri=' + parse.quote(redirect_url))
+            oidc.client_secrets.get('issuer') + '/session/end?post_logout_redirect_uri=' + parse.quote(redirect_url))
