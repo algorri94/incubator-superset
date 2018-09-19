@@ -27,6 +27,7 @@ class AuthOIDCView(AuthOIDView):
         return handle_login()
 
     @expose('/logout/', methods=['GET', 'POST'])
+    @self.appbuilder.sm.oid.require_login
     def logout(self):
         oidc = self.appbuilder.sm.oid
         token = oidc.get_access_token()
