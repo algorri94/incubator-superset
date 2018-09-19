@@ -27,12 +27,17 @@ class AuthOIDCView(AuthOIDView):
         return handle_login()
 
     @expose('/logout/', methods=['GET', 'POST'])
-    @self.appbuilder.sm.oid.require_login
     def logout(self):
         oidc = self.appbuilder.sm.oid
-        token = oidc.get_access_token()
-        oidc.logout()
-        super(AuthOIDCView, self).logout()
+
+        @self.appbuilder.sm.oid.require_login
+        def handle_logout():
+            token = oidc.get_access_token()
+            oidc.logout()
+            super(AuthOIDCView, self).logout()
+            return token
+
+        token = handle_logout()
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
 
         return redirect(
