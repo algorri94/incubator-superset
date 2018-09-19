@@ -17,9 +17,8 @@ class AuthOIDCView(AuthOIDView):
             user = sm.auth_user_oid(oidc.user_getfield('email'))
 
             if user is None:
-                info = oidc.user_getinfo(['preferred_username', 'given_name', 'family_name', 'email'])
-                user = sm.add_user(info.get('email').split("@")[0], info.get('given_name'), info.get('family_name'),
-                                   info.get('email'), sm.find_role('Gamma'))
+                user = sm.add_user(oidc.user_getfield('email').split("@")[0], '', '',
+                                   oidc.user_getfield('email'), sm.find_role('Gamma'))
 
             login_user(user, remember=False)
             return redirect(self.appbuilder.get_url_for_index)
