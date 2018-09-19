@@ -29,7 +29,7 @@ class AuthOIDCView(AuthOIDView):
     @expose('/logout/', methods=['GET', 'POST'])
     def logout(self):
         oidc = self.appbuilder.sm.oid
-        token = oidc.get_cookie_id_token().sid
+        token = oidc.get_cookie_id_token()['sid']
         logger = logging.getLogger('oidc_view')
         logger.info(token)
         oidc.logout()
