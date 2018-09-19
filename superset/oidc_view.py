@@ -29,10 +29,10 @@ class AuthOIDCView(AuthOIDView):
     @expose('/logout/', methods=['GET', 'POST'])
     def logout(self):
         oidc = self.appbuilder.sm.oid
-
+        token = oidc.get_access_token()
         oidc.logout()
         super(AuthOIDCView, self).logout()
         redirect_url = request.url_root.strip('/') + self.appbuilder.get_url_for_login
 
         return redirect(
-            oidc.client_secrets.get('issuer') + '/session/end?post_logout_redirect_uri=' + parse.quote(redirect_url) + '&id_token_hint=' + oidc.get_access_token())
+            oidc.client_secrets.get('issuer') + '/session/end?post_logout_redirect_uri=' + parse.quote(redirect_url) + '&id_token_hint=' + token)
