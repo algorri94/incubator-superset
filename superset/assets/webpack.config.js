@@ -74,6 +74,7 @@ const config = {
   entry: {
     theme: APP_DIR + '/src/theme.js',
     common: APP_DIR + '/src/common.js',
+    resizer: APP_DIR + '/node_modules/iframe-resizer/js/iframeResizer.contentWindow.min.js',
     addSlice: ['babel-polyfill', APP_DIR + '/src/addSlice/index.jsx'],
     explore: ['babel-polyfill', APP_DIR + '/src/explore/index.jsx'],
     dashboard: ['babel-polyfill', APP_DIR + '/src/dashboard/index.jsx'],

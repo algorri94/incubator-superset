@@ -35,6 +35,9 @@
     {% for entry in js_manifest('common') %}
       <script src="{{ entry }}"></script>
     {% endfor %}
+    {% for entry in js_manifest('resizer') %}
+      <script src="{{ entry }}"></script>
+    {% endfor %}
 
     <input
       type="hidden"
