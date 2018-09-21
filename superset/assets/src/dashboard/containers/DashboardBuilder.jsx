@@ -13,7 +13,8 @@ function mapStateToProps({ dashboardLayout: undoableLayout, dashboardState, dash
     dashboardLayout: undoableLayout.present,
     editMode: dashboardState.editMode,
     showBuilderPane: dashboardState.showBuilderPane,
-    dashboardInfo: dashboardInfo
+    dashboardInfo: dashboardInfo,
+    css: dashboardState.css
   };
 }
 

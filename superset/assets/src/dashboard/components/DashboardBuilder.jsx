@@ -16,7 +16,7 @@ import DragDroppable from './dnd/DragDroppable';
 import DashboardComponent from '../containers/DashboardComponent';
 import ToastPresenter from '../../messageToasts/containers/ToastPresenter';
 import WithPopoverMenu from './menu/WithPopoverMenu';
-
+import injectCustomCss from '../util/injectCustomCss';
 import getDragDropManager from '../util/getDragDropManager';
 
 import {
@@ -59,6 +59,10 @@ class DashboardBuilder extends React.Component {
     };
     this.handleChangeTab = this.handleChangeTab.bind(this);
     this.handleDeleteTopLevelTabs = this.handleDeleteTopLevelTabs.bind(this);
+  }
+
+  componentWillMount() {
+    injectCustomCss(this.props.css);
   }
 
   getChildContext() {
