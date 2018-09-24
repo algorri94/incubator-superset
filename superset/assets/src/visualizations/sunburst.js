@@ -192,7 +192,7 @@ function Sunburst(element, props) {
 
     gMiddleText.selectAll('*').remove();
 
-    gMiddleText.append('text')
+    /**gMiddleText.append('text')
       .attr('class', 'path-abs-percent')
       .attr('y', yOffsets[offsetIndex++])
       .text(absolutePercString + ' of total');
@@ -202,10 +202,10 @@ function Sunburst(element, props) {
         .attr('class', 'path-cond-percent')
         .attr('y', yOffsets[offsetIndex++])
         .text(conditionalPercString + ' of parent');
-    }
+    }**/
 
     gMiddleText.append('text')
-      .attr('class', 'path-metrics')
+      .attr('class', 'path-abs-percent')
       .attr('y', yOffsets[offsetIndex++])
       .text(`${metricLabel(metrics[0])}: ${formatNum(d.m1)}` + (metricsMatch ? '' : `, ${metricLabel(metrics[1])}: ${formatNum(d.m2)}`));
 
