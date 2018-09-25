@@ -48,7 +48,7 @@ function Sunburst(element, props) {
     colorScheme,
     metrics,
   } = props;
-  console.log(element);
+  const slice_id = element.id;
   // vars with shared scope within this function
   const margin = { top: 10, right: 5, bottom: 10, left: 5 };
   const containerWidth = width;
@@ -398,7 +398,7 @@ function Sunburst(element, props) {
 
     slice.append('path')
         .attr('class', 'hidden-arc')
-        .attr('id', (_, i) => `hiddenArc${i}`)
+        .attr('id', (_, i) => `#hiddenArc_` + slice_id + `_${i}`)
         .attr('d', arc);
 
     slice.append('text')
@@ -406,7 +406,7 @@ function Sunburst(element, props) {
         .attr("x", 5)   //Move the text from the start angle of the arc
         .attr("dy", 18) //Move the text down
         .append('textPath')
-        .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+        .attr('xlink:href', (_, i) => `#hiddenArc_` + slice_id + `_${i}` )
         .text(d => d.name)
 
 
