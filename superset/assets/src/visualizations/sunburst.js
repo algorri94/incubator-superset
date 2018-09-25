@@ -48,7 +48,7 @@ function Sunburst(element, props) {
     colorScheme,
     metrics,
   } = props;
-
+  console.log(element);
   // vars with shared scope within this function
   const margin = { top: 10, right: 5, bottom: 10, left: 5 };
   const containerWidth = width;
