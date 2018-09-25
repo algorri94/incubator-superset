@@ -81,6 +81,16 @@ function Sunburst(element, props) {
     .innerRadius(d => Math.sqrt(d.y))
     .outerRadius(d => Math.sqrt(d.y + d.dy));
 
+  const textFits = d => {
+      const CHAR_SPACE = 6;
+
+      const deltaAngle = d.dx;
+      const r = Math.max(0, (Math.sqrt(d.y) + Math.sqrt(d.y + d.dy)) / 2);
+      const perimeter = r * deltaAngle;
+
+      return d.name.length * CHAR_SPACE + 5 < perimeter;
+  };
+
   const formatNum = d3.format('.1s');
   const formatPerc = d3.format('.1p');
 
@@ -371,10 +381,11 @@ function Sunburst(element, props) {
         .range(['#00D1C1', 'white', '#FFB400']);
     }
 
-    arcs.selectAll('path')
+    var slice = arcs.selectAll('path')
         .data(nodes)
-      .enter()
-        .append('svg:path')
+        .enter()
+
+    slice.append('svg:path')
         .attr('display', d => d.depth ? null : 'none')
         .attr('d', arc)
         .attr('fill-rule', 'evenodd')
@@ -383,6 +394,21 @@ function Sunburst(element, props) {
           : colorScale(d.m2 / d.m1))
         .style('opacity', 1)
         .on('mouseenter', mouseenter);
+
+
+    slice.append('path')
+        .attr('class', 'hidden-arc')
+        .attr('id', (_, i) => `hiddenArc${i}`)
+        .attr('d', arc);
+
+    slice.append('text')
+        .attr('display', d => textFits(d) && d.name!=="root" ? null : 'none')
+        .attr("x", 5)   //Move the text from the start angle of the arc
+        .attr("dy", 18) //Move the text down
+        .append('textPath')
+        .attr('xlink:href', (_, i) => `#hiddenArc${i}` )
+        .text(d => d.name)
+
 
     // Get total size of the tree = value of root node from partition.
     totalSize = root.value;

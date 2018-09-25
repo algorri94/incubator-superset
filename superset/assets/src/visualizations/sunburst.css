@@ -31,6 +31,10 @@
   fill: #333;
 }
 
+.sunburst .hidden-arc{
+  fill: none;
+}
+
 /* dashboard specific */
 .dashboard .sunburst text {
   font-size: 1em;
@@ -48,3 +52,5 @@
 .dashboard .sunburst .path-ratio {
   font-size: 1em;
 }
+
+
