@@ -22,10 +22,6 @@ export default function getEffectiveExtraFilters({
   }
 
   Object.keys(filters).forEach(filteringSliceId => {
-    if (filteringSliceId === sliceId.toString()) {
-      // Filters applied by the slice don't apply to itself
-      return;
-    }
     const filtersFromSlice = filters[filteringSliceId];
     Object.keys(filtersFromSlice).forEach(field => {
       if (!immuneToFields.includes(field)) {

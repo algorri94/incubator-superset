@@ -197,7 +197,7 @@ class Dashboard extends React.PureComponent {
 
     this.getAllCharts().forEach(chart => {
       // filterKey is a string, immune array contains numbers
-      if (String(chart.id) !== filterKey && immune.indexOf(chart.id) === -1) {
+      if (immune.indexOf(chart.id) === -1) {
         const updatedFormData = getFormDataWithExtraFilters({
           chart,
           dashboardMetadata: this.props.dashboardInfo.metadata,

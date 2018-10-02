@@ -1444,6 +1444,7 @@ class DistributionPieViz(NVD3Viz):
         df.sort_values(by=metric, ascending=False, inplace=True)
         df = df.reset_index()
         df.columns = ['x', 'y']
+        df['filter'] = self.groupby[0]
         return df.to_dict(orient='records')
 
 
@@ -1546,10 +1547,11 @@ class DistributionBarViz(DistributionPieViz):
                 values.append({
                     'x': x,
                     'y': v,
+                    'filter': self.groupby[0],
                 })
             d = {
                 'key': series_title,
-                'values': values,
+                'values': values
             }
             chart_data.append(d)
         return chart_data
