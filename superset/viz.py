@@ -1576,7 +1576,7 @@ class SunburstViz(BaseViz):
         if metric == secondary_metric or secondary_metric is None:
             df.columns = cols + ['m1']
             df['m2'] = df['m1']
-        return json.loads(df.to_json(orient='values'))
+        return json.loads(df.to_json(orient='split'))
 
     def query_obj(self):
         qry = super(SunburstViz, self).query_obj()
