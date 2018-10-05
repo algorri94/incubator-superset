@@ -98,7 +98,7 @@ const vizMap = {
     loadVis(import(/* webpackChunkName: "pivot_table" */ './pivot_table.js')),
   [VIZ_TYPES.sankey]: () => loadVis(import(/* webpackChunkName: "sankey" */ './sankey.js')),
   [VIZ_TYPES.separator]: () => loadVis(import(/* webpackChunkName: "markup" */ './markup.js')),
-  [VIZ_TYPES.sunburst]: () => loadVis(import(/* webpackChunkName: "sunburst" */ './sunburst.js')),
+  [VIZ_TYPES.sunburst]: () => loadVis(import(/* webpackChunkName: "sunburst" */ './sunburst.jsx')),
   [VIZ_TYPES.table]: () => loadVis(import(/* webpackChunkName: "table" */ './table.js')),
   [VIZ_TYPES.time_table]: () =>
     loadVis(import(/* webpackChunkName: "time_table" */ './time_table.jsx')),

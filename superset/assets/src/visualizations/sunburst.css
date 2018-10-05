@@ -32,7 +32,13 @@
 }
 
 .sunburst .hidden-arc{
-  fill: none;
+  fill: none !important;
+  opacity: 0 !important;
+}
+
+.hidden-arc{
+  fill: none !important;
+  opacity: 0 !important;
 }
 
 /* dashboard specific */

@@ -72,6 +72,10 @@ class NVD3Vis extends React.Component {
     this.renderChart();
   }
 
+  componentDidUpdate() {
+    this.renderChart();
+  }
+
   filterData(e) {
     var datum = e.data;
     const selectedValues = Object.assign({}, this.state.selectedValues);
