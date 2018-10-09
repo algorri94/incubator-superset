@@ -1028,7 +1028,7 @@ class NVD3Vis extends React.Component {
             .attr("dy", ".32em")
             .text(function (d) { 
               if(d.length > 14) {
-                return d.substr(0,14) + '...';
+                return d.substr(0,13).trim() + '...';
               }
               return d; 
             });
