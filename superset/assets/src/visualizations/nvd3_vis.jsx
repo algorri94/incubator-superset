@@ -447,7 +447,11 @@ class NVD3Vis extends React.Component {
       if (width < BREAKPOINTS.small && vizType !== 'pie') {
         chart.showLegend(false);
       } else {
-        chart.showLegend(fd.show_legend);
+        if(vizType==='pie') {
+          chart.showLegend(false);
+        } else {
+          chart.showLegend(fd.show_legend);
+        }
       }
     }
 
@@ -572,7 +576,11 @@ class NVD3Vis extends React.Component {
     }
     // This is needed for correct chart dimensions if a chart is rendered in a hidden container
     chart.width(width);
-    chart.height(height);
+    if (fd.show_legend && vizType === 'pie') {
+      chart.height(height*0.8);
+    } else {
+      chart.height(height);
+    }
     $(this.props.selector).css('height', height + 'px');
 
     svg
@@ -946,8 +954,166 @@ class NVD3Vis extends React.Component {
 
   renderChart() {
     const selector = this.props.selector;
-    const filterData = this.filterData.bind(this);
-    nv.addGraph(this.drawGraph);
+    const viz_type = this.props.formData.viz_type;
+    const color_scheme = this.props.formData.color_scheme;
+    const showLegend = this.props.formData.show_legend;
+    const height = this.props.height();
+    const width = this.props.width();
+    nv.addGraph(this.drawGraph, function(){
+      if('pie'===viz_type && showLegend) {
+        var pie = d3.select(selector + ' .nv-wrap > g > .nv-pie');
+        var transPie = d3.transform(pie.attr("transform"));
+        pie.attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
+        var legendY = d3.transform(d3.select(selector + ' .nv-wrap').attr("transform")).translate[1];
+        d3.selectAll(selector + ' svg .nv-wrap g > .nv-legendWrap').remove();
+        var svg = d3.select(selector + ' svg .nv-wrap g')
+          .append('g')
+          .attr('class', 'nv-legendWrap nvd3-svg')
+          .attr('transform', 'translate(0,-'+legendY+')')
+          .append('g')
+          .attr('class', 'nvd3 nv-legend')
+          .attr('transform', 'translate(0,5)')
+          .append('g');
+        const data = svg.datum().reduce(function(res, currentValue) {
+          if ( res.indexOf(currentValue.x) === -1 ) {
+            res.push(currentValue.x);
+          }
+          return res;
+        }, []);
+        var legendCount = data.length;
+        var textLength = Math.min(data.reduce(function (a, b) { return a.length > b.length ? a : b; }).length*6+6,  70);
+        var legendWidth=10; var legendSpacing=6;
+
+        var netLegendHeight=(legendWidth+legendSpacing)*legendCount;
+        var legendPerPage,totalPages,pageNo,columnsNo,rowsNo;
+
+        if((height*0.2-10)/20 > 1){
+            columnsNo = Math.floor((width-50)/(legendWidth+textLength));
+            rowsNo = Math.floor(height*0.2/20);
+            legendPerPage= columnsNo * rowsNo;
+            totalPages=Math.ceil(legendCount/legendPerPage);
+
+            pageNo=1;
+
+            var startIndex=(pageNo-1)*legendPerPage;
+            var endIndex=startIndex+legendPerPage;
+            var seriesSubset=[];
+
+            for(var i=0;i<data.length;i++){
+                if(i>=startIndex && i<endIndex){
+                    seriesSubset.push(data[i]);
+                }
+            }  
+
+            DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages);
+        }
+
+        function DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages){
+
+            var legend = svg.selectAll(".nv-series")
+            .data(seriesSubset)
+            .enter().append("g")
+            .attr('class','nv-series')
+            .attr("transform", function (d, i) { return "translate(" + ((legendWidth+textLength)*(i%columnsNo)) + ","+ (10 + 20*Math.floor(i/columnsNo)) +")"; });
+
+            legend.append("circle")
+            .attr('class', 'nv-legend-symbol')
+            .attr("r", 5)
+            .style('fill',function(d,i){return getColorFromScheme(d, color_scheme);});
+            
+            legend.append("text")
+            .attr('class', 'nv-legend-text')
+            .attr("dx", 8)
+            .attr("dy", ".32em")
+            .text(function (d) { return d; });
+
+            if(totalPages>1){
+              var pageText = svg.append("g")
+              .attr('class','pageNo')
+              .attr("transform", "translate(" + ((legendWidth+textLength)*(columnsNo) + 10) + ",20)");
+
+              pageText.append('text').text(pageNo+'/'+totalPages)
+              .attr('dx','.25em');
+
+              var prevtriangle = svg.append("g")
+              .attr('class','prev')
+              .attr("transform", "translate(" + ((legendWidth+textLength)*(columnsNo) + 16) + ",0)")
+              .on('click',prevLegend)
+              .style('cursor','pointer');
+
+              var nexttriangle = svg.append("g")
+              .attr('class','next')
+              .attr("transform", "translate(" + ((legendWidth+textLength)*(columnsNo) + 16) + ",25)")
+              .on('click',nextLegend)
+              .style('cursor','pointer');
+
+              nexttriangle.append('polygon')
+                  .style('stroke','#000')
+                  .style('fill','#000')
+                  .attr('points','0,0, 10,0, 5,5');
+
+              prevtriangle.append('polygon')
+                  .style('stroke','#000')
+                  .style('fill','#000')
+                  .attr('points','0,5, 10,5, 5,0');
+
+              if(pageNo==totalPages){
+                  nexttriangle.style('opacity','0.5')
+                  nexttriangle.on('click','')
+                  .style('cursor','');
+              }
+              else if(pageNo==1){
+                  prevtriangle.style('opacity','0.5')
+                  prevtriangle.on('click','')
+                  .style('cursor','');
+              }
+            }
+        }
+
+        function prevLegend(){
+            pageNo--;
+
+            svg.selectAll(".nv-series").remove();
+            svg.select('.pageNo').remove();
+            svg.select('.prev').remove();
+            svg.select('.next').remove();
+
+            var startIndex=(pageNo-1)*legendPerPage;
+            var endIndex=startIndex+legendPerPage;
+
+            var seriesSubset=[];
+
+            for(var i=0;i<data.length;i++){
+                if(i>=startIndex && i<endIndex){
+                    seriesSubset.push(data[i]);
+                }
+            }  
+
+            DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages);
+        }
+        
+        function nextLegend(){
+            pageNo++;
+
+            svg.selectAll(".nv-series").remove();
+            svg.select('.pageNo').remove();
+            svg.select('.prev').remove();
+            svg.select('.next').remove();
+
+            var startIndex=(pageNo-1)*legendPerPage;
+            var endIndex=startIndex+legendPerPage;
+
+            var seriesSubset=[];
+
+            for(var i=0;i<data.length;i++){
+                if(i>=startIndex && i<endIndex){
+                    seriesSubset.push(data[i]);
+                }
+            }  
+           DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages);
+        }
+      }
+    });
   }
 
   render() {
