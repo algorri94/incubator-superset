@@ -964,6 +964,7 @@ class NVD3Vis extends React.Component {
         var pie = d3.select(selector + ' .nv-wrap > g > .nv-pie');
         var transPie = d3.transform(pie.attr("transform"));
         pie.attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
+        d3.select(selector + ' .nv-wrap > g > .nv-pieLabels').attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
         var legendY = d3.transform(d3.select(selector + ' .nv-wrap').attr("transform")).translate[1];
         d3.selectAll(selector + ' svg .nv-wrap g > .nv-legendWrap').remove();
         var svg = d3.select(selector + ' svg .nv-wrap g')
@@ -981,7 +982,7 @@ class NVD3Vis extends React.Component {
           return res;
         }, []);
         var legendCount = data.length;
-        var textLength = Math.min(data.reduce(function (a, b) { return a.length > b.length ? a : b; }).length*6+6,  70);
+        var textLength = Math.min(data.reduce(function (a, b) { return a.length > b.length ? a : b; }).length*8+8,  120);
         var legendWidth=10; var legendSpacing=6;
 
         var netLegendHeight=(legendWidth+legendSpacing)*legendCount;
@@ -1025,7 +1026,12 @@ class NVD3Vis extends React.Component {
             .attr('class', 'nv-legend-text')
             .attr("dx", 8)
             .attr("dy", ".32em")
-            .text(function (d) { return d; });
+            .text(function (d) { 
+              if(d.length > 14) {
+                return d.substr(0,14) + '...';
+              }
+              return d; 
+            });
 
             if(totalPages>1){
               var pageText = svg.append("g")
