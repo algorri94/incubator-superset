@@ -66,6 +66,7 @@ class NVD3Vis extends React.Component {
     this.wrapTooltip = this.wrapTooltip.bind(this);
     this.getMaxLabelSize = this.getMaxLabelSize.bind(this);
     this.formatLabel = this.formatLabel.bind(this);
+    this.drawPieLegend = this.drawPieLegend.bind(this);
   }
 
   componentDidMount() {
@@ -952,19 +953,18 @@ class NVD3Vis extends React.Component {
     return chart;
   }
 
-  renderChart() {
-    const selector = this.props.selector;
-    const viz_type = this.props.formData.viz_type;
-    const color_scheme = this.props.formData.color_scheme;
-    const showLegend = this.props.formData.show_legend;
-    const height = this.props.height();
-    const width = this.props.width();
-    nv.addGraph(this.drawGraph, function(){
-      if('pie'===viz_type && showLegend) {
-        var pie = d3.select(selector + ' .nv-wrap > g > .nv-pie');
+  drawPieLegend(props) {
+    const selector = props.selector;
+    const viz_type = props.formData.viz_type;
+    const color_scheme = props.formData.color_scheme;
+    const showLegend = props.formData.show_legend;
+    const height = props.height();
+    const width = props.width();
+    if('pie'===viz_type && showLegend) {
+        var pie = d3.select(selector + ' .nv-pieWrap > .nv-wrap > g > .nv-pie');
         var transPie = d3.transform(pie.attr("transform"));
         pie.attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
-        d3.select(selector + ' .nv-wrap > g > .nv-pieLabels').attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
+        d3.select(selector + ' .nv-pieWrap > .nv-wrap > g > .nv-pieLabels').attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
         var legendY = d3.transform(d3.select(selector + ' .nv-wrap').attr("transform")).translate[1];
         d3.selectAll(selector + ' svg .nv-wrap g > .nv-legendWrap').remove();
         var svg = d3.select(selector + ' svg .nv-wrap g')
@@ -1117,6 +1117,24 @@ class NVD3Vis extends React.Component {
                 }
             }  
            DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages);
+        }
+      }
+  }
+
+  renderChart() {
+    var chart;
+    const props = this.props;
+    const drawPieLegend = this.drawPieLegend;
+    const drawGraph = this.drawGraph;
+    nv.addGraph({
+      generate: function() {
+        chart = drawGraph();
+      },
+      callback: function() {
+        if ('pie'===props.formData.viz_type && props.formData.show_legend) {
+          chart.dispatch.on('renderEnd', function(){
+            drawPieLegend(props);
+          });
         }
       }
     });
