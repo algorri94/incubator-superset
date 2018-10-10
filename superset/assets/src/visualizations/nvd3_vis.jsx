@@ -67,6 +67,7 @@ class NVD3Vis extends React.Component {
     this.getMaxLabelSize = this.getMaxLabelSize.bind(this);
     this.formatLabel = this.formatLabel.bind(this);
     this.drawPieLegend = this.drawPieLegend.bind(this);
+    this.calculateLegendData = this.calculateLegendData.bind(this);
   }
 
   componentDidMount() {
@@ -578,7 +579,14 @@ class NVD3Vis extends React.Component {
     // This is needed for correct chart dimensions if a chart is rendered in a hidden container
     chart.width(width);
     if (fd.show_legend && vizType === 'pie') {
-      chart.height(height*0.8);
+      var fltrdData = data.reduce(function(res, currentValue) {
+          if ( res.indexOf(currentValue.x) === -1 ) {
+            res.push(currentValue.x);
+          }
+          return res;
+        }, []);
+      var h = this.calculateLegendData(fltrdData, width, height).h;
+      chart.height(height-h);
     } else {
       chart.height(height);
     }
@@ -953,6 +961,30 @@ class NVD3Vis extends React.Component {
     return chart;
   }
 
+  calculateLegendData(data, width, height) {
+    var output = {};
+    var legendWidth = 10;
+    var legendCount = data.length;
+    var textLength = Math.min(data.reduce(function (a, b) { return a.length > b.length ? a : b; }).length*8+8,  120);
+    var legendPerPage,totalPages,columnsNo,rowsNo;
+
+    columnsNo = Math.floor((width-50)/(legendWidth+textLength));
+    rowsNo = Math.floor(height*0.2/20);
+    legendPerPage = columnsNo * rowsNo;
+    totalPages = Math.ceil(legendCount/legendPerPage);
+    var h = Math.min(height * 0.2, Math.ceil(Math.min(legendCount, legendPerPage)/columnsNo) * 20 + 10);
+
+
+    output.h = h;
+    output.legendWidth = legendWidth;
+    output.textLength = textLength;
+    output.legendPerPage = legendPerPage;
+    output.totalPages = totalPages;
+    output.columnsNo = columnsNo;
+
+    return output;
+  }
+
   drawPieLegend(props) {
     const selector = props.selector;
     const viz_type = props.formData.viz_type;
@@ -961,52 +993,54 @@ class NVD3Vis extends React.Component {
     const height = props.height();
     const width = props.width();
     if('pie'===viz_type && showLegend) {
-        var pie = d3.select(selector + ' .nv-pieWrap > .nv-wrap > g > .nv-pie');
-        var transPie = d3.transform(pie.attr("transform"));
-        pie.attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
-        d3.select(selector + ' .nv-pieWrap > .nv-wrap > g > .nv-pieLabels').attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+height*0.2) + ")");
-        var legendY = d3.transform(d3.select(selector + ' .nv-wrap').attr("transform")).translate[1];
-        d3.selectAll(selector + ' svg .nv-wrap g > .nv-legendWrap').remove();
-        var svg = d3.select(selector + ' svg .nv-wrap g')
-          .append('g')
-          .attr('class', 'nv-legendWrap nvd3-svg')
-          .attr('transform', 'translate(0,-'+legendY+')')
-          .append('g')
-          .attr('class', 'nvd3 nv-legend')
-          .attr('transform', 'translate(0,5)')
-          .append('g');
+        var legendPerPage,totalPages,pageNo,columnsNo,h,textLength,legendWidth,svg;
+
+        svg = d3.select(selector + ' svg .nv-wrap g');
         const data = svg.datum().reduce(function(res, currentValue) {
           if ( res.indexOf(currentValue.x) === -1 ) {
             res.push(currentValue.x);
           }
           return res;
         }, []);
-        var legendCount = data.length;
-        var textLength = Math.min(data.reduce(function (a, b) { return a.length > b.length ? a : b; }).length*8+8,  120);
-        var legendWidth=10; var legendSpacing=6;
-
-        var netLegendHeight=(legendWidth+legendSpacing)*legendCount;
-        var legendPerPage,totalPages,pageNo,columnsNo,rowsNo;
 
         if((height*0.2-10)/20 > 1){
-            columnsNo = Math.floor((width-50)/(legendWidth+textLength));
-            rowsNo = Math.floor(height*0.2/20);
-            legendPerPage= columnsNo * rowsNo;
-            totalPages=Math.ceil(legendCount/legendPerPage);
+          var mData = this.calculateLegendData(data, width, height);
+          h = mData.h;
+          legendWidth = mData.legendWidth;
+          textLength = mData.textLength;
+          legendPerPage = mData.legendPerPage;
+          totalPages = mData.totalPages;
+          columnsNo = mData.columnsNo;
 
-            pageNo=1;
+          var pie = d3.select(selector + ' .nv-pieWrap > .nv-wrap > g > .nv-pie');
+          var transPie = d3.transform(pie.attr("transform"));
+          
+          pie.attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+h) + ")");
+          d3.select(selector + ' .nv-pieWrap > .nv-wrap > g > .nv-pieLabels').attr("transform", "translate(" + transPie.translate[0] + "," + (transPie.translate[1]+h) + ")");
+          var legendY = d3.transform(d3.select(selector + ' .nv-wrap').attr("transform")).translate[1];
+          d3.selectAll(selector + ' svg .nv-wrap g > .nv-legendWrap').remove();
+          svg = svg.append('g')
+            .attr('class', 'nv-legendWrap nvd3-svg')
+            .attr('transform', 'translate(0,-'+legendY+')')
+            .append('g')
+            .attr('class', 'nvd3 nv-legend')
+            .attr('transform', 'translate(0,5)')
+            .append('g');
+          
 
-            var startIndex=(pageNo-1)*legendPerPage;
-            var endIndex=startIndex+legendPerPage;
-            var seriesSubset=[];
+          pageNo=1;
 
-            for(var i=0;i<data.length;i++){
-                if(i>=startIndex && i<endIndex){
-                    seriesSubset.push(data[i]);
-                }
-            }  
+          var startIndex=(pageNo-1)*legendPerPage;
+          var endIndex=startIndex+legendPerPage;
+          var seriesSubset=[];
 
-            DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages);
+          for(var i=0;i<data.length;i++){
+              if(i>=startIndex && i<endIndex){
+                  seriesSubset.push(data[i]);
+              }
+          }  
+
+          DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages);
         }
 
         function DrawLegendSubset(seriesSubset,legendPerPage,pageNo,totalPages){
