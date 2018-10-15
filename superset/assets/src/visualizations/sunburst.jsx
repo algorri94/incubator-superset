@@ -300,7 +300,7 @@ class Sunburst extends React.Component {
 
       gMiddleText.append('text')
         .attr('class', 'path-abs-percent')
-        .attr('y', yOffsets[offsetIndex+2])
+        .attr('y', yOffsets[offsetIndex++])
         .text(`${metricLabel(metrics[0])}: ${formatNum(d.m1)}` + (metricsMatch ? '' : `, ${metricLabel(metrics[1])}: ${formatNum(d.m2)}`));
 
       /**gMiddleText.append('text')
