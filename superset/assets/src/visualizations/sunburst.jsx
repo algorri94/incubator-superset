@@ -304,13 +304,13 @@ class Sunburst extends React.Component {
 
       gMiddleText.append('text')
         .attr('class', 'path-abs-percent')
-        .attr('y', yOffsets[offsetIndex++])
+        .attr('y', yOffsets[offsetIndex+3])
         .text(`${metricLabel(metrics[0])}: ${formatNum(d.m1)}` + (metricsMatch ? '' : `, ${metricLabel(metrics[1])}: ${formatNum(d.m2)}`));
 
-      gMiddleText.append('text')
+      /**gMiddleText.append('text')
         .attr('class', 'path-ratio')
         .attr('y', yOffsets[offsetIndex++])
-        .text((metricsMatch ? '' : (`${metricLabel(metrics[1])}/${metricLabel(metrics[0])}: ${formatPerc(d.m2 / d.m1)}`)));
+        .text((metricsMatch ? '' : (`${metricLabel(metrics[1])}/${metricLabel(metrics[0])}: ${formatPerc(d.m2 / d.m1)}`)));**/
 
       // Reset and fade all the segments.
       arcs.selectAll('path')
@@ -469,7 +469,7 @@ class Sunburst extends React.Component {
         ext = d3.extent(nodes, d => d.m2 / d.m1);
         colorScale = d3.scale.linear()
           .domain([ext[0], ext[0] + ((ext[1] - ext[0]) / 2), ext[1]])
-          .range(['#00D1C1', 'white', '#FFB400']);
+          .range(['#00D1C1', 'gray', '#FFB400']);
       }
 
       var slice = arcs.selectAll('path')
