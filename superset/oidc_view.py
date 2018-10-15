@@ -12,6 +12,7 @@ class AuthOIDCView(AuthOIDView):
     def login(self, flag=True):
         sm = self.appbuilder.sm
         oidc = sm.oid
+        next_url = parse.unquote(request.args.get('next',''));
 
         @self.appbuilder.sm.oid.require_login
         def handle_login():
@@ -22,7 +23,7 @@ class AuthOIDCView(AuthOIDView):
                                    oidc.user_getfield('email'), sm.find_role('Gamma'))
 
             login_user(user, remember=False)
-            return redirect(self.appbuilder.get_url_for_index)
+            return redirect(next_url)
 
         return handle_login()
 
