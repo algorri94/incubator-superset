@@ -231,9 +231,7 @@ class Sunburst extends React.Component {
       entering.append('svg:polygon')
           .attr('points', breadcrumbPoints)
           .style('fill', function (d) {
-            return colorByCategory ?
-              colorFn(d.name) :
-              colorScale(d.m2 / d.m1);
+            return colorFn(d.name);
           });
 
       entering.append('svg:text')
@@ -242,9 +240,7 @@ class Sunburst extends React.Component {
           .attr('dy', '0.35em')
           .style('fill', function (d) {
             // Make text white or black based on the lightness of the background
-            const col = d3.hsl(colorByCategory ?
-              colorFn(d.name) :
-              colorScale(d.m2 / d.m1));
+            const col = d3.hsl(colorFn(d.name));
             return col.l < 0.5 ? 'white' : 'black';
           })
           .attr('class', 'step-label')
