@@ -304,7 +304,7 @@ class Sunburst extends React.Component {
 
       gMiddleText.append('text')
         .attr('class', 'path-abs-percent')
-        .attr('y', yOffsets[offsetIndex+3])
+        .attr('y', yOffsets[offsetIndex+2])
         .text(`${metricLabel(metrics[0])}: ${formatNum(d.m1)}` + (metricsMatch ? '' : `, ${metricLabel(metrics[1])}: ${formatNum(d.m2)}`));
 
       /**gMiddleText.append('text')
@@ -480,9 +480,7 @@ class Sunburst extends React.Component {
           .attr('display', d => d.depth ? null : 'none')
           .attr('d', arc)
           .attr('fill-rule', 'evenodd')
-          .style('fill', d => colorByCategory
-            ? colorFn(d.name)
-            : colorScale(d.m2 / d.m1))
+          .style('fill', d => colorFn(d.name))
           .style('opacity', 1)
           .on('mouseenter', mouseenter)
           .on("click", function(d) {
