@@ -59,7 +59,7 @@ const loadVis = promise =>
     // deckgl visualizations don't use esModules, fix it?
     return defaultExport.default || defaultExport;
   });
-const loadNvd3 = () => loadVis(import(/* webpackChunkName: "nvd3_vis" */ './nvd3/nvd3_vis.jsx'));
+const loadNvd3 = () => loadVis(import(/* webpackChunkName: "nvd3_vis" */ './nvd3/adaptor.jsx'));
 
 const vizMap = {
   [VIZ_TYPES.area]: loadNvd3,
@@ -98,7 +98,7 @@ const vizMap = {
     loadVis(import(/* webpackChunkName: "pivot_table" */ './PivotTable/adaptor.jsx')),
   [VIZ_TYPES.sankey]: () => loadVis(import(/* webpackChunkName: "sankey" */ './Sankey/adaptor.jsx')),
   [VIZ_TYPES.separator]: () => loadVis(import(/* webpackChunkName: "markup" */ './markup.js')),
-  [VIZ_TYPES.sunburst]: () => loadVis(import(/* webpackChunkName: "sunburst" */ './Sunburst/sunburst.jsx')),
+  [VIZ_TYPES.sunburst]: () => loadVis(import(/* webpackChunkName: "sunburst" */ './Sunburst/adaptor.jsx')),
   [VIZ_TYPES.table]: () => loadVis(import(/* webpackChunkName: "table" */ './Table/adaptor.jsx')),
   [VIZ_TYPES.time_table]: () =>
     loadVis(import(/* webpackChunkName: "time_table" */ './TimeTable/adaptor.jsx')),
