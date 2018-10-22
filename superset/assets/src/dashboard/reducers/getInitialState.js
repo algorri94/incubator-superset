@@ -22,8 +22,6 @@ import { getScale } from '../../modules/CategoricalColorNamespace';
 
 export default function(bootstrapData) {
   const { user_id, datasources, common, editMode } = bootstrapData;
-  delete common.locale;
-  delete common.language_pack;
 
   const dashboard = { ...bootstrapData.dashboard_data };
   let filters = {};
@@ -140,6 +138,7 @@ export default function(bootstrapData) {
   };
 
   return {
+    featureFlags: common.feature_flags,
     datasources,
     sliceEntities: { ...initSliceEntities, slices, isLoading: false },
     charts: chartQueries,
@@ -160,7 +159,10 @@ export default function(bootstrapData) {
       standalone_mode: dashboard.standalone_mode,
       superset_can_explore: dashboard.superset_can_explore,
       slice_can_edit: dashboard.slice_can_edit,
-      common,
+      common: {
+        flash_messages: common.flash_messages,
+        conf: common.conf,
+      },
     },
     dashboardState: {
       sliceIds: Array.from(sliceIds),
