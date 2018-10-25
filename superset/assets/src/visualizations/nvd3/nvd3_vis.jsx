@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
-import { t } from '../locales';
+import { t } from '../../locales';
 import $ from 'jquery';
-import throttle from 'lodash.throttle';
+import { throttle } from 'lodash';
 import d3 from 'd3';
 import nv from 'nvd3';
 import 'nvd3/build/nv.d3.min.css';
@@ -20,7 +20,7 @@ import { customizeToolTip, d3TimeFormatPreset, d3FormatPreset, tryNumify } from 
 import { formatDateVerbose } from '../modules/dates';
 import { isTruthy, TIME_SHIFT_PATTERN } from '../utils/common';
 
-import './nvd3_vis.css';
+import './NVD3Vis.css';
 import { VIZ_TYPES } from './';
 
 const propTypes = {
